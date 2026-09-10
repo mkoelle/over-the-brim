@@ -1,0 +1,153 @@
+[gd_scene load_steps=18 format=3]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.6, 0.75, 0.9, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_Ground"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="BoxMesh" id="Mesh_Ground"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="BoxShape3D" id="Shape_OuterWallA"]
+size = Vector3(1, 3, 46)
+
+[sub_resource type="BoxMesh" id="Mesh_OuterWallA"]
+size = Vector3(1, 3, 46)
+
+[sub_resource type="BoxShape3D" id="Shape_OuterWallB"]
+size = Vector3(46, 3, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_OuterWallB"]
+size = Vector3(46, 3, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_InnerWallA"]
+size = Vector3(1, 3, 34)
+
+[sub_resource type="BoxMesh" id="Mesh_InnerWallA"]
+size = Vector3(1, 3, 34)
+
+[sub_resource type="BoxShape3D" id="Shape_InnerWallB"]
+size = Vector3(34, 3, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_InnerWallB"]
+size = Vector3(34, 3, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_EndCapSouth"]
+size = Vector3(13, 3, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_EndCapSouth"]
+size = Vector3(13, 3, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_EndCapEast"]
+size = Vector3(1, 3, 13)
+
+[sub_resource type="BoxMesh" id="Mesh_EndCapEast"]
+size = Vector3(1, 3, 13)
+
+[sub_resource type="BoxShape3D" id="Shape_Ramp"]
+size = Vector3(8, 1, 16)
+
+[sub_resource type="BoxMesh" id="Mesh_Ramp"]
+size = Vector3(8, 1, 16)
+
+[node name="TestTrack" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+position = Vector3(0, 20, 0)
+rotation_degrees = Vector3(-45, -30, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("Shape_Ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("Mesh_Ground")
+
+[node name="Walls" type="Node3D" parent="."]
+
+[node name="OuterWallA" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, -17)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/OuterWallA"]
+shape = SubResource("Shape_OuterWallA")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/OuterWallA"]
+mesh = SubResource("Mesh_OuterWallA")
+
+[node name="OuterWallB" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1.5, 6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/OuterWallB"]
+shape = SubResource("Shape_OuterWallB")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/OuterWallB"]
+mesh = SubResource("Mesh_OuterWallB")
+
+[node name="InnerWallA" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -23)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/InnerWallA"]
+shape = SubResource("Shape_InnerWallA")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/InnerWallA"]
+mesh = SubResource("Mesh_InnerWallA")
+
+[node name="InnerWallB" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.5, -6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/InnerWallB"]
+shape = SubResource("Shape_InnerWallB")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/InnerWallB"]
+mesh = SubResource("Mesh_InnerWallB")
+
+[node name="EndCapSouth" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -40)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/EndCapSouth"]
+shape = SubResource("Shape_EndCapSouth")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/EndCapSouth"]
+mesh = SubResource("Mesh_EndCapSouth")
+
+[node name="EndCapEast" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 1.5, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/EndCapEast"]
+shape = SubResource("Shape_EndCapEast")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/EndCapEast"]
+mesh = SubResource("Mesh_EndCapEast")
+
+[node name="Ramp" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.258819, 0, -0.258819, 0.9659258, -25, 2.553, 25)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ramp"]
+shape = SubResource("Shape_Ramp")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ramp"]
+mesh = SubResource("Mesh_Ramp")
