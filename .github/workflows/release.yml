@@ -30,22 +30,26 @@ jobs:
             preset: "Windows Desktop"
             out: build/windows
             check: build/windows/OverTheBrim.exe
+            zip: true
             artifact: OverTheBrim-windows.zip
           - name: linux
             preset: "Linux"
             out: build/linux
             check: build/linux/OverTheBrim.x86_64
+            zip: true
             artifact: OverTheBrim-linux.zip
           - name: macos
             preset: "macOS"
             out: build/macos
             check: build/macos/OverTheBrim.zip
+            zip: false
             artifact: OverTheBrim-macos.zip
           - name: android
             preset: "Android"
             out: build/android
             check: build/android/OverTheBrim.apk
-            artifact: OverTheBrim-android.zip
+            zip: false
+            artifact: OverTheBrim-android.apk
     steps:
       - uses: actions/checkout@v7
         with:
@@ -149,12 +153,22 @@ jobs:
             exit 1
           fi
 
-      - name: Zip artifact
+      - name: Package artifact
+        # Windows/Linux exports are two files (executable + .pck) and need
+        # zipping into one downloadable asset. macOS and Android already
+        # produce a single native archive/package (Godot's own .zip, or the
+        # signed .apk) -- zipping those again was double-compressing an
+        # already-compressed file, which is what made the macOS release
+        # asset fail to unzip. Ship those natively instead.
         run: |
-          cd ${{ matrix.out }}
-          zip -r "../../${{ matrix.artifact }}" .
+          if [ "${{ matrix.zip }}" = "true" ]; then
+            cd ${{ matrix.out }}
+            zip -r "../../${{ matrix.artifact }}" .
+          else
+            cp "${{ matrix.check }}" "${{ matrix.artifact }}"
+          fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}
@@ -164,12 +178,12 @@ jobs:
     needs: export
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
-          files: dist/*.zip
+          files: dist/OverTheBrim-*
           generate_release_notes: true

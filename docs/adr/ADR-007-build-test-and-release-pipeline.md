@@ -147,6 +147,27 @@ custom render pipeline; no live-ops backend).
   was briefly out of sync (a `mise`-managed `4.6.2` shim shadowed the intended
   `4.7.2` from Homebrew on PATH) and corrected to `"4.7"` / `4.7.2`. Confirm
   which `godot` resolves first on PATH before touching this again.
+- **No double-zipping macOS/Android.** The `v0.0.1-alpha` macOS asset failed
+  to unzip on download. Cause: Godot's macOS export already produces a single
+  `.zip` (the `.app` bundle), and the release workflow's old single "Zip
+  artifact" step re-zipped that already-compressed file into a second zip
+  unconditionally for every platform — Android's already-signed `.apk` got
+  the same treatment. Matrix gained a `zip: true/false` field (`true` for
+  Windows/Linux, which are genuinely two loose files needing bundling; `false`
+  for macOS/Android, which are already single distributable files) — the
+  packaging step now copies those straight through instead of re-compressing.
+  Android's artifact extension also changed from `.zip` to the correct `.apk`.
+- **Action versions.** `actions/upload-artifact@v4` and
+  `actions/download-artifact@v4` were both several majors behind
+  (latest: v7 and v8 respectively — CI logs were already flagging the v4/Node
+  20 deprecation), and `softprops/action-gh-release@v2` had a v3. Checked each
+  major version's changelog for breaking changes before bumping — none apply
+  to this workflow's usage (v5-era artifact-action bumps are Node-runtime
+  only; the one real breaking change, v5's "inconsistent path behavior for
+  single artifact downloads by ID," only affects downloading a single named
+  artifact by ID, not this workflow's `merge-multiple: true` download-all).
+  `actions/checkout@v7` and `chickensoft-games/setup-godot@v2` were already
+  on their latest major.
 
 ### Consequences
 
