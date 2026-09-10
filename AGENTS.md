@@ -248,6 +248,87 @@ Do not place large documentation in AGENTS.md.
 
 ---
 
+# Boundaries
+
+Never modify:
+
+- .godot/
+- .import/
+- *.uid files directly
+- addons/ vendor code without approval
+
+Never commit:
+
+- export_presets.cfg
+- .DS_Store
+
+---
+
+# Development Commands
+
+Run game:
+
+```bash
+godot --path . --scene res://scenes/main.tscn
+```
+
+Run tests:
+
+Defined after test framework ADR.
+
+---
+
+# Naming Conventions
+
+Files: snake_case.gd
+
+Classes: PascalCase
+
+Variables: snake_case
+
+Constants: UPPER_SNAKE_CASE
+
+Signals: past_tense_snake_case (race_finished, lap_completed)
+
+Nodes: PascalCase matching purpose (PlayerVehicle, RaceHUD)
+
+Scenes: snake_case.tscn matching primary script
+
+---
+
+# Autoload Policy
+
+Use Autoloads for:
+
+- EventBus (global signal bus)
+- GameConfig (settings and constants)
+
+Do not use Autoloads for:
+
+- per-race state
+- player-specific data
+- UI management
+
+Minimize Autoload count.
+
+---
+
+# Verification
+
+After modifying scripts:
+
+- confirm no parse errors
+- verify scene references are intact
+- run affected test scenes
+
+After modifying scenes:
+
+- verify node paths are valid
+- check signal connections
+- test with 2+ players when relevant
+
+---
+
 # Output Style
 
 For technical responses:

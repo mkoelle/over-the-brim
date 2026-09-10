@@ -11,7 +11,7 @@ This project follows a few core principles:
 - Fun over realism
 - Skill over randomness
 - Social competition over solitary play
-- Emerent gameplay over scripted experiences
+- Emergent gameplay over scripted experiences
 - Maintainable systems over quick hacks
 
 The goal is to create a racing game that is easy to pick up, difficult to master, and consistently generates memorable stories between players.
@@ -57,7 +57,7 @@ For coding agents:
 ├── STATE.md
 │
 ├── docs
-│   ├── adrs
+│   ├── adr
 │   │   └── DECISIONS.md
 │   │
 │   ├── architecture
@@ -170,7 +170,7 @@ Focuses on *how the game should feel*.
 
 ---
 
-## docs/adrs
+## docs/adr
 
 Architectural Decision Records.
 
