@@ -1,7 +1,7 @@
 # Development State
 
 ## Active Milestone
-**Phase A: Foundation — Iteration 01: Drivable Prototype**
+**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-8 complete on `feature/drivable-prototype`, pending review/merge.**
 
 ---
 
@@ -39,6 +39,15 @@
   Android adaptive launcher icons (placeholder art, generated from
   `icon.svg`), `CHANGELOG.md`, and a documented branching/PR policy
   (`docs/standards/branching.md`).
+- **Iteration 01 (Drivable Prototype) milestone reached** on
+  `feature/drivable-prototype`: input map + per-device `InputSource`
+  (Architecture Decision 01), data-driven `VehicleStats` resource
+  (`stovepipe_speedster.tres`), `VehicleController` (arcade accel/brake/
+  steer/drift on `CharacterBody3D`), `test_track.tscn` sandbox, a
+  `ChaseCamera`, and `main.tscn` wired end-to-end so running the project
+  spawns a drivable car on the test track with a following camera —
+  Guardrail 3's "1-Car Fun" Rule, verified. Real GdUnit4 coverage added
+  for `VehicleController` (acceleration, max-speed clamp, NaN guard).
 
 ---
 
@@ -119,11 +128,19 @@ before it unless marked parallel.
    tests --ignoreHeadlessMode -c` passes.
    *Depends on*: 3, 4.
 
-9. **Debug HUD toggle** (P2, optional) — on-screen speed/gear readout
-   gated behind a `GameConfig.debug_mode` flag, off by default. Keeps
-   debug tools separated from the player experience per the maturity
-   checklist; skip if #1-8 already feel done without it.
+9. **Debug HUD toggle** (P2, optional, not yet done) — on-screen
+   speed/gear readout gated behind a `GameConfig.debug_mode` flag, off by
+   default. Keeps debug tools separated from the player experience per
+   the maturity checklist; skip if #1-8 already feel done without it —
+   they do, so treat this as a nice-to-have, not a blocker.
    *Depends on*: 4, 7.
+
+**Tasks 1-8 are complete** (`feature/drivable-prototype`, not yet merged).
+Next actions once this branch lands: open the project in the editor and
+actually feel-test the handling by hand (headless verification confirms
+correctness, not fun — see Guardrail 1 in game-pillars.md), then decide
+whether task 9 or real hat-car art comes first before starting Iteration
+02.
 
 ### Explicitly out of scope for this milestone
 
