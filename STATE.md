@@ -158,6 +158,16 @@ shape: charge a timer while `drift` is held above some minimum speed,
 tiered boost strength by charge duration (see Mini-Turbo's
 regular/super/ultra tiers), applied as a temporary speed boost on release.
 
+Same family, same research pass: jump tricks. Mario Kart Wii onward
+reward a timed trick input during a jump with a landing speed boost (a
+"Jump Boost" — same shape as Mini-Turbo, just keyed to airtime instead of
+a drift). `VehicleController` now has `stats.air_control` (partial
+control/boost effectiveness while airborne, added when the initial "falls
+like a slow drift" bug turned out to be an overcorrection — genre
+research showed kart racers universally give *some* air control, several
+(Crash Team Racing) more than ground control) but no trick/boost-on-land
+mechanic yet. Bundle with the drift-boost work above when it's tackled.
+
 ### Explicitly out of scope for this milestone
 
 Per the *Over-Engineering Before Fun* risk below and Guardrail 3: no

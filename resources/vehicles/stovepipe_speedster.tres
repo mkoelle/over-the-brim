@@ -10,3 +10,4 @@ braking_force = 22.0
 steering_rate = 2.4
 drift_grip = 0.55
 mass = 900.0
+air_control = 0.35
