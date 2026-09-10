@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # Pin in lockstep with ci.yml's GODOT_VERSION and project.godot's engine version.
-      image: barichello/godot-ci:4.6.2
+      image: barichello/godot-ci:4.7.2
     strategy:
       matrix:
         include:

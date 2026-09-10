@@ -54,9 +54,11 @@ custom render pipeline; no live-ops backend).
   top-hat/wheel motif) — swap for real art in `assets/art/ui/` once available;
   update the `config/icon` path and `export_presets.cfg`'s
   `application/icon` / `launcher_icons/*` fields to match.
-- Fixed `project.godot`'s `config/features` from `"4.7"` to `"4.6"` to match
-  the actually-installed engine (`4.6.2.stable`) — a stale mismatch that
-  would otherwise trip Godot's version-downgrade prompt in CI.
+- `project.godot`'s `config/features` and the CI/release pins (`GODOT_VERSION`,
+  `barichello/godot-ci` tag) must match the actually-installed engine — this
+  was briefly out of sync (a `mise`-managed `4.6.2` shim shadowed the intended
+  `4.7.2` from Homebrew on PATH) and corrected to `"4.7"` / `4.7.2`. Confirm
+  which `godot` resolves first on PATH before touching this again.
 
 ### Consequences
 

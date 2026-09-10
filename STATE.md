@@ -22,7 +22,7 @@
 ## Recent Progress
 - Adopted official project title: **Over The Brim** (replacing provisional title).
 - Established full vehicle archetype roster (Stovepipe Speedster, Bowler Bruiser, Fez Drifter, Sombrero Brawler, Flat Cap Scrapper).
-- Initialized Godot 4.6 project, display settings, and 3D collision layer mapping.
+- Initialized Godot 4.7 project, display settings, and 3D collision layer mapping.
 - Scaffolded repository directory structure matching asset standards.
 - Codified foundational architectural decisions (ADR-001 through ADR-006).
 - Documented core game design for Race Modes, Active Spectator System, Vehicle Customization, and Event Management.
