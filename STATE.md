@@ -15,13 +15,12 @@
 ## Known Risks & Traps
 - **Over-Engineering Before Fun**: Guarding against writing tournament coordinators or complex netcode before proving that 1 car driving on 1 track is inherently fun.
 - **Competitive vs. Party Paradox**: Enforcing the *Telegraphed Chaos Rule* so spectator hazards remain avoidable with high skill.
-- **Storefront Naming Filter (Resolved)**: Officially adopted **Over The Brim**, completely clearing storefront filters and collision conflicts.
 - **Touchscreen Steering Trap**: Confining mobile/touch input to spectator sabotage and voting, leaving driving strictly to physical gamepads/keyboards.
 
 ---
 
 ## Recent Progress
-- Adopted official project title: **Over The Brim** (replacing provisional title CRAP).
+- Adopted official project title: **Over The Brim** (replacing provisional title).
 - Established full vehicle archetype roster (Stovepipe Speedster, Bowler Bruiser, Fez Drifter, Sombrero Brawler, Flat Cap Scrapper).
 - Initialized Godot 4.6 project, display settings, and 3D collision layer mapping.
 - Scaffolded repository directory structure matching asset standards.

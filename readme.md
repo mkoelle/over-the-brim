@@ -2,7 +2,7 @@
 
 A couch-first multiplayer racing party game where living, wheeled headwear battles through chaotic circuits, spectator-triggered hazards, and high-stakes tournament brackets.
 
-*Over The Brim* plays on the hat's physical brim and the precipice of disaster — capturing the high-stakes edge of pack racing and room-wide spectator sabotage where one miscalculation sends you spilling over the edge.
+High-octane pack racing where one bad drift—or one vindictive spectator—sends you straight over the brim.
 
 
 ## Design Philosophy

@@ -28,7 +28,7 @@ Most indie racers fail on Twitch because streams are locked to a single driver's
 
 ---
 
-## The Bear Case: The 4 Fatal Traps
+## The Bear Case: The 3 Fatal Traps
 
 ### Trap 1: Architecture Before Fun (Premature Over-Engineering)
 - **The Danger**: Spending months engineering 100-entrant tournament coordinators, ENet packet quantizers, and multi-window managers before proving the core driving feel.
@@ -42,9 +42,6 @@ Most indie racers fail on Twitch because streams are locked to a single driver's
 ### Trap 3: Virtual Touchscreen Steering
 - **The Danger**: Virtual on-screen joysticks on smartphones feel terrible for high-speed precision arcade racing.
 - **Rule**: Phones are strictly for Spectator Chaos Controls (tapping hazard triggers, voting, betting). Racing requires physical gamepads or keyboards.
-
-### Trap 4: Storefront & Platform Suppressive Acronym (Resolved)
-- **Resolution**: Shifted from the provisional working title "CRAP" to **Over The Brim** — playing on the hat brim and the edge of disaster. Completely eliminates storefront censorship and search algorithm suppression while delivering a distinct, 100% collision-free brand.
 
 ---
 
