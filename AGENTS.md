@@ -244,7 +244,26 @@ Design decisions:
 
 docs/design/
 
+Task sizing:
+
+docs/standards/task-sizing.md
+
+Task template:
+
+docs/templates/task-template.md
+
 Do not place large documentation in AGENTS.md.
+
+---
+
+# Task Tracking
+
+Use `.squad/tasks.json` (via `/squad:tasks`, `/squad:next`, `/squad:task <id>`)
+as the source of truth for task-level backlog: atomic tasks, dependencies,
+status. Size each task per `docs/standards/task-sizing.md` before recording it.
+
+STATE.md stays at milestone/phase level only — current priorities and recent
+progress, not individual tasks.
 
 ---
 
