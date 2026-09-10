@@ -58,6 +58,44 @@ custom render pipeline; no live-ops backend).
   correct. The archive is ~1.2GB; the step is a no-op (just an `ls` check)
   whenever the image's own templates are already usable, so this only costs
   download time on the fallback path.
+- **`container.env.HOME=/root`.** The `v0.0.1-alpha` re-run (after the
+  `fail-fast`/template fixes above) still failed all four platforms with three
+  distinct errors, root-caused by pulling `barichello/godot-ci:4.7.2` locally
+  (`podman`) and reproducing each one directly against the same image:
+  - **Android**: `A valid Java SDK path is required in Editor Settings.`
+    GitHub Actions overrides `HOME` to an empty `/github/home` for `container:`
+    jobs by default. The image bakes a working `/root/.config/godot/
+    editor_settings-4.7.tres` (java_sdk_path, android_sdk_path) *and*
+    `/root/.local/share/godot/export_templates/4.7.2.stable/` — both invisible
+    once `HOME` points elsewhere, which is also why the template-download
+    step above was actually firing in CI despite the image already having
+    them. Confirmed by reproducing the exact error locally with
+    `HOME=/github/home` and watching it disappear with `HOME=/root`.
+  - **macOS + Android**: `ETC2/ASTC texture compression is required` /
+    `Cannot export for universal or arm64 if ETC2 ASTC texture format is
+    disabled`. This is a **project setting**
+    (`rendering/textures/vram_compression/import_etc2_astc` in
+    `project.godot`), not an export-preset option — the
+    `texture_format/etc2_astc` key that already existed in
+    `export_presets.cfg` was a red herring for a different, unrelated
+    setting. Fixed by adding `[rendering] textures/vram_compression/
+    import_etc2_astc=true` to `project.godot`.
+  - **Windows + Linux**: exit 132, `handle_crash: Program crashed with signal
+    11` immediately followed by `Illegal instruction`, happening *after*
+    `savepack` reaches 100% (`[ DONE ] savepack`) — the export artifact
+    (`OverTheBrim.x86_64` / `.exe` + `.pck`) is already written to disk
+    correctly before the crash. Preceded every time by `cannot connect to
+    daemon at tcp:5037: Connection refused`. Because an Android preset is
+    configured, Godot's Android export plugin loads and polls `adb`
+    regardless of which platform is being exported; a refused connection
+    during its post-export hook is what triggers the fatal index error.
+    Root-caused and fixed by adding a `Start adb server` step
+    (`adb start-server`) before any export — reproduced the crash locally
+    without it and confirmed it disappears with it, on this exact image.
+  All four platforms (Windows, Linux, macOS, Android debug-signed) now export
+  clean end-to-end against `barichello/godot-ci:4.7.2` locally via `podman`,
+  verified before touching CI again rather than guessing through further
+  tag-push cycles.
 - **Targets: Desktop (Win/Linux/macOS) + Android**, no iOS/Web yet — nothing
   in the design docs needs those; add when a concrete need exists (e.g. the
   spectator companion app from ADR-006 might justify Web/mobile later).

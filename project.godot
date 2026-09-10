@@ -38,3 +38,7 @@ window/stretch/mode="canvas_items"
 3d_physics/layer_3="Hazards"
 3d_physics/layer_4="Pickups"
 3d_physics/layer_5="Triggers"
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true

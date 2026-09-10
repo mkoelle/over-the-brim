@@ -15,6 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.7.2
+      # GitHub Actions overrides HOME to an empty /github/home for container
+      # jobs by default, hiding the image's own /root/.config/godot (java_sdk_path,
+      # android_sdk_path) and /root/.local/share/godot/export_templates.
+      # Point HOME back at /root so the image's baked-in config is used.
+      env:
+        HOME: /root
     strategy:
       fail-fast: false
       matrix:
@@ -39,6 +45,15 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Start adb server
+        # The Android export plugin loads (an Android preset is configured)
+        # and polls adb during every export, not just Android's. A refused
+        # connection here crashes Godot's export process with a fatal index
+        # error after the export has already finished writing its output
+        # (verified locally against this exact image: reproduces on every
+        # platform without this, disappears with it).
+        run: adb start-server
 
       - name: Import project
         run: godot --headless --editor --quit
