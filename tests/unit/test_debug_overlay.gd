@@ -49,7 +49,7 @@ func test_overlay_shows_live_speed_and_input() -> void:
 	var runner := scene_runner(MAIN_SCENE)
 	var main: Node = runner.scene()
 	var overlay: CanvasLayer = main.get_node("DebugOverlay")
-	var label: Label = overlay.get_node("Label")
+	var label: Label = overlay.get_node("PanelContainer/Label")
 
 	runner.simulate_key_press(KEY_F3)
 	runner.simulate_action_press("throttle")

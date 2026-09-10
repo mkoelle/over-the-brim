@@ -12,7 +12,7 @@ extends CanvasLayer
 ## same pattern as ChaseCamera.target.
 @export var target: VehicleController
 
-@onready var _label: Label = $Label
+@onready var _label: Label = $PanelContainer/Label
 
 
 func _process(_delta: float) -> void:
