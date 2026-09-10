@@ -278,8 +278,14 @@ Never modify:
 
 Never commit:
 
-- export_presets.cfg
+- signing secrets: `*.keystore`, `*.jks`, or any credential typed into
+  `export_presets.cfg`'s `keystore/*_user` / `keystore/*_password` fields
+  (see ADR-007 — those must stay empty in the tracked file; CI injects them
+  from GitHub Secrets)
 - .DS_Store
+
+`export_presets.cfg` itself IS committed (ADR-007) — it holds build/platform
+config, not secrets.
 
 ---
 
@@ -291,9 +297,26 @@ Run game:
 godot --path . --scene res://scenes/main.tscn
 ```
 
-Run tests:
+Run tests (GdUnit4, ADR-007, once `addons/gdUnit4/` is installed):
 
-Defined after test framework ADR.
+```bash
+godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add tests -rd -c
+```
+
+Export a build locally:
+
+```bash
+godot --headless --export-release "Windows Desktop"
+godot --headless --export-release "Linux"
+godot --headless --export-release "macOS"
+godot --headless --export-debug "Android"
+```
+
+Cut a release (tag push triggers `.github/workflows/release.yml`):
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
 
 ---
 

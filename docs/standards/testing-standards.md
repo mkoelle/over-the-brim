@@ -9,7 +9,9 @@ Require:
 
 ## Test Framework
 
-To be decided via ADR. Candidates: GdUnit4, GUT.
+GdUnit4 (ADR-007). Install via AssetLib/editor into `addons/gdUnit4/`.
+Run headless: `godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add tests -rd -c`.
+CI (`.github/workflows/ci.yml`) runs this automatically once the addon is present.
 
 ## Test Categories
 

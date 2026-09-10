@@ -1,7 +1,11 @@
 # Godot
 .godot/
 *.import
-export_presets.cfg
+
+# Build output / signing secrets (never commit keystores)
+/build/
+*.keystore
+*.jks
 
 # OS
 .DS_Store

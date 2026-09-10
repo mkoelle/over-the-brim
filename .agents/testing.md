@@ -25,7 +25,8 @@ Prefer test scenes over theory.
 
 Test Framework:
 
-To be decided via ADR. Candidates: GdUnit4, GUT.
+GdUnit4 (ADR-007). Not yet vendored — install into `addons/gdUnit4/` via
+AssetLib/editor when the first test is written.
 
 ---
 

@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  export:
+    name: Export ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    container:
+      # Pin in lockstep with ci.yml's GODOT_VERSION and project.godot's engine version.
+      image: barichello/godot-ci:4.6.2
+    strategy:
+      matrix:
+        include:
+          - name: windows
+            preset: "Windows Desktop"
+            out: build/windows
+            artifact: OverTheBrim-windows.zip
+          - name: linux
+            preset: "Linux"
+            out: build/linux
+            artifact: OverTheBrim-linux.zip
+          - name: macos
+            preset: "macOS"
+            out: build/macos
+            artifact: OverTheBrim-macos.zip
+          - name: android
+            preset: "Android"
+            out: build/android
+            artifact: OverTheBrim-android.zip
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Import project
+        run: godot --headless --editor --quit
+
+      - name: Configure Android signing
+        if: matrix.name == 'android'
+        run: |
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android_release.keystore
+            sed -i "s#keystore/release=\"\"#keystore/release=\"$(pwd)/android_release.keystore\"#" export_presets.cfg
+            sed -i "s#keystore/release_user=\"\"#keystore/release_user=\"${{ secrets.ANDROID_KEY_ALIAS }}\"#" export_presets.cfg
+            sed -i "s#keystore/release_password=\"\"#keystore/release_password=\"${{ secrets.ANDROID_KEYSTORE_PASSWORD }}\"#" export_presets.cfg
+            echo "EXPORT_MODE=--export-release" >> "$GITHUB_ENV"
+          else
+            echo "No ANDROID_KEYSTORE_BASE64 secret set — falling back to debug-signed APK (see docs/adr/ADR-007)."
+            echo "EXPORT_MODE=--export-debug" >> "$GITHUB_ENV"
+          fi
+
+      - name: Export (desktop)
+        if: matrix.name != 'android'
+        run: |
+          mkdir -p ${{ matrix.out }}
+          godot --headless --export-release "${{ matrix.preset }}"
+
+      - name: Export (android)
+        if: matrix.name == 'android'
+        run: |
+          mkdir -p ${{ matrix.out }}
+          godot --headless ${{ env.EXPORT_MODE }} "${{ matrix.preset }}"
+
+      - name: Zip artifact
+        run: |
+          cd ${{ matrix.out }}
+          zip -r "../../${{ matrix.artifact }}" .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  release:
+    name: Publish GitHub Release
+    needs: export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true

@@ -27,6 +27,10 @@
 - Codified foundational architectural decisions (ADR-001 through ADR-006).
 - Documented core game design for Race Modes, Active Spectator System, Vehicle Customization, and Event Management.
 - Established design guardrails and strategic risk analysis.
+- Added build/test/release foundation (ADR-007): placeholder app icon,
+  `export_presets.cfg` for Windows/Linux/macOS/Android, GitHub Actions CI
+  (`ci.yml`) and tag-triggered release pipeline (`release.yml`), GdUnit4
+  chosen as test framework (not yet vendored).
 
 ---
 
@@ -34,3 +38,9 @@
 1. Create `VehicleStats` Resource script (`res://scripts/resources/vehicle_stats.gd`).
 2. Create prototype top-hat vehicle scene (`res://scenes/vehicles/tophat_car.tscn`) and controller (`res://scripts/vehicles/vehicle_controller.gd`).
 3. Build sandbox test track with collision geometry (`res://scenes/arenas/test_track.tscn`).
+4. Install GdUnit4 into `addons/gdUnit4/` (AssetLib) once #1-3 give something worth testing.
+5. Before first real release: provision an Android release keystore and set
+   `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEY_ALIAS` / `ANDROID_KEYSTORE_PASSWORD`
+   GitHub Secrets (see ADR-007) — until then, release builds are debug-signed.
+6. Replace placeholder `icon.svg` with real art once `assets/art/ui/` has one;
+   update `config/icon` and `export_presets.cfg`'s icon fields to match.

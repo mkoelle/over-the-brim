@@ -1,5 +1,7 @@
 # Over The Brim
 
+[![CI](https://github.com/mkoelle/over-the-brim/actions/workflows/ci.yml/badge.svg)](https://github.com/mkoelle/over-the-brim/actions/workflows/ci.yml)
+
 A couch-first multiplayer racing party game where living, wheeled headwear battles through chaotic circuits, spectator-triggered hazards, and high-stakes tournament brackets.
 
 High-octane pack racing where one bad drift—or one vindictive spectator—sends you straight over the brim.

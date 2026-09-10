@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  GODOT_VERSION: "4.6.2"
+
+jobs:
+  test:
+    name: Import & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Import project (headless editor pass)
+        run: godot --headless --editor --quit
+
+      - name: Check for parse/script errors
+        run: |
+          godot --headless --quit 2>&1 | tee godot_check.log
+          if grep -qiE "SCRIPT ERROR|Parse Error" godot_check.log; then
+            echo "GDScript parse errors found."
+            exit 1
+          fi
+
+      - name: Run GdUnit4 tests
+        run: |
+          if [ -d "addons/gdUnit4" ]; then
+            godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add tests -rd -c
+          else
+            echo "addons/gdUnit4 not installed yet — skipping test run (see docs/adr/ADR-007)."
+          fi
