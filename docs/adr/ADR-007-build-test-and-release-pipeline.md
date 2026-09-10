@@ -87,24 +87,30 @@ custom render pipeline; no live-ops backend).
     `export_presets.cfg` was a red herring for a different, unrelated
     setting. Fixed by adding `[rendering] textures/vram_compression/
     import_etc2_astc=true` to `project.godot`.
-  - **Windows + Linux**: exit 132, `handle_crash: Program crashed with signal
-    11` immediately followed by `Illegal instruction`, happening *after*
+  - **All four platforms**, still unresolved at the engine level: exit 132,
+    `handle_crash: Program crashed with signal 11` (`ERROR: FATAL: Index
+    p_index = 1 is out of bounds (size() = 0).` at `cowdata.h:197`)
+    immediately followed by `Illegal instruction`, happening *after*
     `savepack` reaches 100% (`[ DONE ] savepack`) — the export artifact
-    (`OverTheBrim.x86_64` / `.exe` + `.pck`) is already written to disk
-    correctly before the crash. Preceded every time by `cannot connect to
-    daemon at tcp:5037: Connection refused`. First attempted fix was an
-    `adb start-server` step — wrong: adb itself was failing to start because
-    `$HOME/.android` doesn't exist under the real `HOME`
-    (`Cannot mkdir '/github/home/.android'`), and even after fixing that, the
-    "connection refused" message and crash persisted. The actual cause: the
-    baked editor settings default `export/android/shutdown_adb_on_exit` to
-    `true`, and Godot's Android export plugin — loaded because an Android
-    preset is configured, regardless of which platform is being exported —
-    tries to talk to `adb` on shutdown; a refused connection during that
-    shutdown path is what triggers the fatal index crash. Confirmed by
-    flipping that one setting to `false` (via `sed`, in the same config-copy
-    step) and re-testing with **no adb daemon running at all** — every
-    platform exports cleanly with no crash and no adb setup whatsoever.
+    (`.exe`/`.x86_64`/`.zip`/`.apk` + `.pck` as applicable) is already
+    written to disk correctly before the crash, every single time it's been
+    observed. Was initially (wrongly) diagnosed as an `adb`-shutdown issue —
+    it was preceded by `cannot connect to daemon at tcp:5037: Connection
+    refused` on the first two attempts, and disabling `shutdown_adb_on_exit`
+    (above) does eliminate that log line. But a subsequent run with that fix
+    in place, and *no* "connection refused" line anywhere in the log, still
+    crashed identically on GitHub's real x86_64 runners. It has also never
+    reproduced locally under `podman` on this arm64 Mac (QEMU-emulated
+    amd64) with otherwise-identical commands against the identical image —
+    so it may be a real x86_64-hardware-specific Godot 4.7.2 bug that QEMU's
+    translation happens not to trigger. Root cause left unresolved; the
+    pragmatic fix is to stop trusting Godot's exit code and check for the
+    actual artifact instead — `matrix.check` names the expected output file
+    per platform, and the `Export (desktop)`/`Export (android)` steps treat
+    the step as failed only when that file is genuinely missing (`|| true`
+    on the godot invocation, then `[ -s "$check" ]`). Revisit if a later
+    Godot patch fixes this, or if it starts producing a missing/corrupt
+    artifact instead of a benign post-write crash.
   - Two gaps caught by review before this ever reached a real release
     attempt: the `release` job had no `permissions: contents: write`, which
     `softprops/action-gh-release` needs to create the release and upload
@@ -112,11 +118,12 @@ custom render pipeline; no live-ops backend).
     added at the workflow level. And repeated re-tags during this debugging
     session had no guard against overlapping runs — added
     `concurrency: {group: release-${{ github.ref }}, cancel-in-progress: true}`.
-  All four platforms (Windows, Linux, macOS, Android debug-signed) now export
-  clean end-to-end against `barichello/godot-ci:4.7.2` locally via `podman`
-  — using a detached container plus per-step `exec` calls to match GitHub's
-  real execution model, not a single combined shell — verified before
-  touching CI again rather than guessing through further tag-push cycles.
+  Windows, Linux, and macOS (Android debug-signed) all export clean
+  end-to-end against `barichello/godot-ci:4.7.2` locally via `podman` —
+  using a detached container plus per-step `exec` calls to match GitHub's
+  real execution model, not a single combined shell — with zero crashes
+  observed there; the crash is specific to GitHub's actual runners and is
+  now tolerated rather than reproduced-and-fixed.
 - **Targets: Desktop (Win/Linux/macOS) + Android**, no iOS/Web yet — nothing
   in the design docs needs those; add when a concrete need exists (e.g. the
   spectator companion app from ADR-006 might justify Web/mobile later).

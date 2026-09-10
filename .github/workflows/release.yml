@@ -29,18 +29,22 @@ jobs:
           - name: windows
             preset: "Windows Desktop"
             out: build/windows
+            check: build/windows/OverTheBrim.exe
             artifact: OverTheBrim-windows.zip
           - name: linux
             preset: "Linux"
             out: build/linux
+            check: build/linux/OverTheBrim.x86_64
             artifact: OverTheBrim-linux.zip
           - name: macos
             preset: "macOS"
             out: build/macos
+            check: build/macos/OverTheBrim.zip
             artifact: OverTheBrim-macos.zip
           - name: android
             preset: "Android"
             out: build/android
+            check: build/android/OverTheBrim.apk
             artifact: OverTheBrim-android.zip
     steps:
       - uses: actions/checkout@v7
@@ -53,18 +57,16 @@ jobs:
         # runner's own `docker create -e HOME=/github/home` wins regardless
         # of what's set here) -- so this image's baked /root/.config/godot
         # (java_sdk_path, android_sdk_path) and
-        # /root/.local/share/godot/export_templates are invisible.
+        # /root/.local/share/godot/export_templates are invisible. This
+        # fixes Android's "valid Java SDK path" export error.
         #
-        # Root cause of the desktop-export crash (exit 132, SIGSEGV right
-        # after savepack reaches 100%): the baked editor settings default
-        # export/android/shutdown_adb_on_exit to true, and Godot's Android
-        # export plugin -- loaded because an Android preset is configured,
-        # regardless of which platform is being exported -- tries to talk to
-        # adb on shutdown. No adb daemon is running, the connection is
-        # refused, and something in that shutdown path crashes fatally.
-        # Verified directly against this exact image (podman, matching GH's
-        # exec-per-step model): flipping this one setting to false makes
-        # every platform export cleanly with zero adb setup needed at all.
+        # Also flips the baked export/android/shutdown_adb_on_exit setting
+        # to false, since the Android export plugin loads for every export
+        # (an Android preset is configured) and otherwise tries to talk to
+        # adb on shutdown, producing a "connection refused" warning with no
+        # adb daemon running. This does NOT fix the separate SIGSEGV crash
+        # every export hits right after savepack -- see the Export steps'
+        # comments for that.
         run: |
           mkdir -p "$HOME/.config/godot" "$HOME/.local/share/godot"
           GODOT_MINOR="${GODOT_VERSION%.*}"
@@ -114,15 +116,38 @@ jobs:
 
       - name: Export (desktop)
         if: matrix.name != 'android'
+        # Godot 4.7.2 reliably crashes (SIGSEGV, exit 132, "Index p_index = 1
+        # is out of bounds (size() = 0)") on this image right after savepack
+        # reaches 100% -- but the export artifact is already written to disk
+        # correctly *before* the crash, every time this was observed
+        # (including in this project's own CI runs). Root cause not
+        # resolved: it reproduces on GitHub's real x86_64 runners but not
+        # locally under podman/QEMU emulation on arm64, and isn't tied to
+        # adb (a run with the adb "connection refused" noise fully
+        # eliminated still crashed identically). So: check for the actual
+        # artifact rather than trusting Godot's exit code, and only fail the
+        # step if the artifact is genuinely missing.
         run: |
           mkdir -p ${{ matrix.out }}
-          godot --headless --export-release "${{ matrix.preset }}"
+          godot --headless --export-release "${{ matrix.preset }}" || true
+          if [ -s "${{ matrix.check }}" ]; then
+            echo "Export artifact present at ${{ matrix.check }} -- continuing despite Godot's exit code (see ADR-007)."
+          else
+            echo "No export artifact at ${{ matrix.check }} -- this is a real failure."
+            exit 1
+          fi
 
       - name: Export (android)
         if: matrix.name == 'android'
         run: |
           mkdir -p ${{ matrix.out }}
-          godot --headless ${{ env.EXPORT_MODE }} "${{ matrix.preset }}"
+          godot --headless ${{ env.EXPORT_MODE }} "${{ matrix.preset }}" || true
+          if [ -s "${{ matrix.check }}" ]; then
+            echo "Export artifact present at ${{ matrix.check }} -- continuing despite Godot's exit code (see ADR-007)."
+          else
+            echo "No export artifact at ${{ matrix.check }} -- this is a real failure."
+            exit 1
+          fi
 
       - name: Zip artifact
         run: |
