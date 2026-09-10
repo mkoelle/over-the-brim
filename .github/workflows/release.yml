@@ -5,6 +5,13 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Pin in lockstep with ci.yml's GODOT_VERSION and project.godot's engine version.
   GODOT_VERSION: "4.7.2"
@@ -15,12 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.7.2
-      # GitHub Actions overrides HOME to an empty /github/home for container
-      # jobs by default, hiding the image's own /root/.config/godot (java_sdk_path,
-      # android_sdk_path) and /root/.local/share/godot/export_templates.
-      # Point HOME back at /root so the image's baked-in config is used.
-      env:
-        HOME: /root
     strategy:
       fail-fast: false
       matrix:
@@ -46,19 +47,41 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Start adb server
-        # The Android export plugin loads (an Android preset is configured)
-        # and polls adb during every export, not just Android's. A refused
-        # connection here crashes Godot's export process with a fatal index
-        # error after the export has already finished writing its output
-        # (verified locally against this exact image: reproduces on every
-        # platform without this, disappears with it).
-        run: adb start-server
+      - name: Restore baked Godot config (Java/Android SDK, adb setting, templates)
+        # GitHub Actions overrides HOME to an empty /github/home for
+        # container jobs and ignores container.env.HOME (confirmed: the
+        # runner's own `docker create -e HOME=/github/home` wins regardless
+        # of what's set here) -- so this image's baked /root/.config/godot
+        # (java_sdk_path, android_sdk_path) and
+        # /root/.local/share/godot/export_templates are invisible.
+        #
+        # Root cause of the desktop-export crash (exit 132, SIGSEGV right
+        # after savepack reaches 100%): the baked editor settings default
+        # export/android/shutdown_adb_on_exit to true, and Godot's Android
+        # export plugin -- loaded because an Android preset is configured,
+        # regardless of which platform is being exported -- tries to talk to
+        # adb on shutdown. No adb daemon is running, the connection is
+        # refused, and something in that shutdown path crashes fatally.
+        # Verified directly against this exact image (podman, matching GH's
+        # exec-per-step model): flipping this one setting to false makes
+        # every platform export cleanly with zero adb setup needed at all.
+        run: |
+          mkdir -p "$HOME/.config/godot" "$HOME/.local/share/godot"
+          GODOT_MINOR="${GODOT_VERSION%.*}"
+          if [ -f "/root/.config/godot/editor_settings-$GODOT_MINOR.tres" ]; then
+            sed 's#export/android/shutdown_adb_on_exit = true#export/android/shutdown_adb_on_exit = false#' \
+              "/root/.config/godot/editor_settings-$GODOT_MINOR.tres" \
+              > "$HOME/.config/godot/editor_settings-$GODOT_MINOR.tres"
+          fi
+          cp -r /root/.local/share/godot/export_templates "$HOME/.local/share/godot/" 2>/dev/null || true
 
       - name: Import project
         run: godot --headless --editor --quit
 
       - name: Ensure Godot export templates
+        # Fallback only -- the step above already copies these from the
+        # image's /root when present. Kept in case a future image tag stops
+        # baking them there.
         run: |
           TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable"
           if [ -d "$TEMPLATE_DIR" ] && [ -n "$(ls -A "$TEMPLATE_DIR" 2>/dev/null)" ]; then

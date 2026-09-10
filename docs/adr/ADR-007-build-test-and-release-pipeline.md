@@ -58,19 +58,26 @@ custom render pipeline; no live-ops backend).
   correct. The archive is ~1.2GB; the step is a no-op (just an `ls` check)
   whenever the image's own templates are already usable, so this only costs
   download time on the fallback path.
-- **`container.env.HOME=/root`.** The `v0.0.1-alpha` re-run (after the
-  `fail-fast`/template fixes above) still failed all four platforms with three
-  distinct errors, root-caused by pulling `barichello/godot-ci:4.7.2` locally
-  (`podman`) and reproducing each one directly against the same image:
-  - **Android**: `A valid Java SDK path is required in Editor Settings.`
-    GitHub Actions overrides `HOME` to an empty `/github/home` for `container:`
-    jobs by default. The image bakes a working `/root/.config/godot/
-    editor_settings-4.7.tres` (java_sdk_path, android_sdk_path) *and*
-    `/root/.local/share/godot/export_templates/4.7.2.stable/` — both invisible
-    once `HOME` points elsewhere, which is also why the template-download
-    step above was actually firing in CI despite the image already having
-    them. Confirmed by reproducing the exact error locally with
-    `HOME=/github/home` and watching it disappear with `HOME=/root`.
+- **"Restore baked Godot config" step + `permissions: contents: write` +
+  `concurrency` guard.** The `v0.0.1-alpha` re-run (after the
+  `fail-fast`/template fixes above) still failed all four platforms.
+  Root-caused by pulling `barichello/godot-ci:4.7.2` locally (`podman`) and
+  reproducing each failure directly against the same image — including
+  replicating GitHub's actual execution model (one long-lived container,
+  each workflow step as a *separate* `docker exec` call), since an earlier
+  single-shell reproduction had missed a step-boundary issue entirely:
+  - **All four**, root problem: GitHub Actions overrides `HOME` to an empty
+    `/github/home` for `container:` jobs and **ignores `container.env.HOME`**
+    — confirmed by inspecting the actual `docker create` command GitHub
+    generates, which hardcodes `-e HOME=/github/home` regardless of what's
+    set in the workflow. So `container.env.HOME=/root`, tried first, does
+    nothing. The image bakes a working `/root/.config/godot/
+    editor_settings-4.7.tres` (java_sdk_path, android_sdk_path,
+    debug_keystore) and `/root/.local/share/godot/export_templates/`, both
+    invisible under the real `HOME`. Fixed by copying both from `/root` into
+    `$HOME` in a new first step, rather than fighting the `HOME` override.
+  - **Android** specifically failed on `A valid Java SDK path is required in
+    Editor Settings.` until the settings copy above was in place.
   - **macOS + Android**: `ETC2/ASTC texture compression is required` /
     `Cannot export for universal or arm64 if ETC2 ASTC texture format is
     disabled`. This is a **project setting**
@@ -85,17 +92,31 @@ custom render pipeline; no live-ops backend).
     `savepack` reaches 100% (`[ DONE ] savepack`) — the export artifact
     (`OverTheBrim.x86_64` / `.exe` + `.pck`) is already written to disk
     correctly before the crash. Preceded every time by `cannot connect to
-    daemon at tcp:5037: Connection refused`. Because an Android preset is
-    configured, Godot's Android export plugin loads and polls `adb`
-    regardless of which platform is being exported; a refused connection
-    during its post-export hook is what triggers the fatal index error.
-    Root-caused and fixed by adding a `Start adb server` step
-    (`adb start-server`) before any export — reproduced the crash locally
-    without it and confirmed it disappears with it, on this exact image.
+    daemon at tcp:5037: Connection refused`. First attempted fix was an
+    `adb start-server` step — wrong: adb itself was failing to start because
+    `$HOME/.android` doesn't exist under the real `HOME`
+    (`Cannot mkdir '/github/home/.android'`), and even after fixing that, the
+    "connection refused" message and crash persisted. The actual cause: the
+    baked editor settings default `export/android/shutdown_adb_on_exit` to
+    `true`, and Godot's Android export plugin — loaded because an Android
+    preset is configured, regardless of which platform is being exported —
+    tries to talk to `adb` on shutdown; a refused connection during that
+    shutdown path is what triggers the fatal index crash. Confirmed by
+    flipping that one setting to `false` (via `sed`, in the same config-copy
+    step) and re-testing with **no adb daemon running at all** — every
+    platform exports cleanly with no crash and no adb setup whatsoever.
+  - Two gaps caught by review before this ever reached a real release
+    attempt: the `release` job had no `permissions: contents: write`, which
+    `softprops/action-gh-release` needs to create the release and upload
+    assets under a repo with non-permissive default workflow permissions —
+    added at the workflow level. And repeated re-tags during this debugging
+    session had no guard against overlapping runs — added
+    `concurrency: {group: release-${{ github.ref }}, cancel-in-progress: true}`.
   All four platforms (Windows, Linux, macOS, Android debug-signed) now export
-  clean end-to-end against `barichello/godot-ci:4.7.2` locally via `podman`,
-  verified before touching CI again rather than guessing through further
-  tag-push cycles.
+  clean end-to-end against `barichello/godot-ci:4.7.2` locally via `podman`
+  — using a detached container plus per-step `exec` calls to match GitHub's
+  real execution model, not a single combined shell — verified before
+  touching CI again rather than guessing through further tag-push cycles.
 - **Targets: Desktop (Win/Linux/macOS) + Android**, no iOS/Web yet — nothing
   in the design docs needs those; add when a concrete need exists (e.g. the
   spectator companion app from ADR-006 might justify Web/mobile later).
