@@ -1,0 +1,1 @@
+UI reads state. Never owns gameplay state.

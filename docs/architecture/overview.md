@@ -1,0 +1,6 @@
+# ARCHITECTURE
+RaceManager
+TournamentManager
+PlayerManager
+VehicleController
+CheckpointSystem
