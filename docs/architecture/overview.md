@@ -127,7 +127,23 @@ A circular buffer storing the past 5–10 seconds of vehicle transforms:
 
 ---
 
-## 5. Dependency Flow & Architecture Rules
+## 5. Session Direction & Multi-Window Architecture
+
+### Role-Based Event Director (`director_token`)
+We decouple network server ownership (`peer_id == 1`) from event management (see [ADR-006](file:///docs/adr/ADR-006-role-based-event-direction-and-multi-window.md)):
+- **Host**: Owns the authoritative network server and physics simulation.
+- **Event Director**: Holds the `director_token` and controls track selection, feature toggles/mutators, and bracket advancement. Can be retained by the host or delegated to a secondary PC, tablet, or presenter client.
+- **Resilient Fallback**: If the delegated director disconnects, authority immediately snaps back to the Host server without interrupting gameplay.
+
+### Single-PC "Host/Presenter Twofer" (Multi-Window)
+On desktop platforms with multiple monitors, the host can leverage Godot 4's `DisplayServer.window_create()` or sub-`Window` nodes to output two distinct views from a single engine process:
+- **Display 1 (Player Monitor)**: 1–4 player split-screen racing viewport for local drivers.
+- **Display 2 (Living Room TV / Projector / Stream)**: Clean Presenter broadcast feed or private Event Operator dashboard.
+- **Key Advantage**: Zero network bandwidth overhead and no second computer required for high-production party setups.
+
+---
+
+## 6. Dependency Flow & Architecture Rules
 
 ```text
 UI (Menus, HUD, Overlays)
@@ -142,3 +158,4 @@ Data (Player profiles, Track definitions, VehicleStats resources)
 - **UI Never Owns Gameplay State**: Menus and HUD elements read data; they never modify race rules or scores directly.
 - **EventBus Decoupling**: Systems communicate high-level milestones (`race_started`, `lap_completed`, `hazard_triggered`) via the global `EventBus`. Per-frame movement or physics stay strictly localized.
 - **Data-Driven Tuning**: Vehicle handling, track parameters, and tournament formats are defined in Godot `.tres` Resource files, enabling hot-reload tuning during testing.
+

@@ -47,3 +47,4 @@ The detailed design documents have been expanded under `docs/design/`:
 - **[Race Modes & Tracks](file:///docs/design/race-modes.md)**: Circuit racing, open-city exploration, battle royale elimination, cat & mouse, capture the chicken, ambient traffic, and jumpable ramp trucks.
 - **[Spectator System](file:///docs/design/spectator-system.md)**: Active spectator minigames, city & hazard manipulation, team alliances, and dedicated spectator awards.
 - **[Vehicle Design & Customization](file:///docs/design/vehicles.md)**: Wheeled top-hat vehicles, expressive animated eyes, hat-on-a-hat stackable accessories, color ribbon customization, and slapstick damage/explosion mechanics.
+- **[Event Management & Session Direction](file:///docs/design/event-management.md)**: Role-Based Event Director pattern, delegated session control, mutators/playlists, and Godot 4 multi-window host/presenter twofer.
