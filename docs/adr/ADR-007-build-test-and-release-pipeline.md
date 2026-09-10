@@ -168,6 +168,23 @@ custom render pipeline; no live-ops backend).
   artifact by ID, not this workflow's `merge-multiple: true` download-all).
   `actions/checkout@v7` and `chickensoft-games/setup-godot@v2` were already
   on their latest major.
+- **macOS ad-hoc codesigning** (`codesign/codesign=1` in `export_presets.cfg`,
+  up from `0`/disabled). The `v0.0.1-alpha` macOS asset showed "'Over The
+  Brim' is damaged and can't be opened" on a real Mac after downloading via
+  Chrome — modern macOS Gatekeeper refuses a completely unsigned app outright
+  (worse than the "unidentified developer" warning a signed-but-unnotarized
+  app gets) once the browser's quarantine attribute is set. Since the binary
+  is `universal` (includes an arm64 slice), this isn't just a download
+  warning either — Apple Silicon requires at least an ad-hoc signature to
+  execute unsigned code at all. Godot's built-in signer handles this without
+  any Apple tooling or account, cross-platform: verified locally that the
+  Linux container (no `codesign` binary present) produces a
+  `Contents/_CodeSignature/CodeResources` in the exported `.app` with
+  `codesign/codesign=1`. This is still not a Developer ID signature and the
+  app is not notarized — right-click-Open (or a first-run Gatekeeper prompt)
+  may still be needed. Full notarization requires an Apple Developer Program
+  membership and is out of scope for this stage; revisit if/when the project
+  ships beyond internal alpha testing.
 
 ### Consequences
 
