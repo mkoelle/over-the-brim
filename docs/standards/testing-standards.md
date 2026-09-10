@@ -17,6 +17,7 @@ CI (`.github/workflows/ci.yml`) runs this automatically once the addon is presen
 
 - **Unit**: Isolated logic (scoring, bracket math, lap counting)
 - **Integration**: Multi-system interaction (checkpoint + race manager)
-- **Play**: Manual test scenes for feel-based validation
+- **Play**: Manual test scenes for feel-based validation — see
+  `docs/standards/manual-testing.md` for how to run it and what to check
 
 See .agents/testing.md for detailed rules.
