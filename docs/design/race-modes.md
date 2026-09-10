@@ -1,6 +1,6 @@
 # Race Modes Design
 
-This document details the planned game modes, track events, and environmental mechanics for **Competitive Racing Arena Party (CRAP)**.
+This document details the planned game modes, track events, and environmental mechanics for **Over The Brim**.
 
 ---
 

@@ -1,8 +1,9 @@
-# Competitive Racing Arena Party (CRAP)
+# Over The Brim
 
-A couch-first multiplayer racing party game focused on chaotic competition, massive tournaments, open track design, and memorable social moments.
+A couch-first multiplayer racing party game where living, wheeled headwear battles through chaotic circuits, spectator-triggered hazards, and high-stakes tournament brackets.
 
-Players race through circuits, shortcuts, elimination events, and tournament brackets where skill, risk-taking, and player interaction matter just as much as raw speed.
+*Over The Brim* plays on the hat's physical brim and the precipice of disaster — capturing the high-stakes edge of pack racing and room-wide spectator sabotage where one miscalculation sends you spilling over the edge.
+
 
 ## Design Philosophy
 

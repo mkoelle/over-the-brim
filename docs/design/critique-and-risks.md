@@ -1,6 +1,6 @@
 # Project Critique, Risk Analysis & Hit/Miss Evaluation
 
-This document serves as the permanent strategic reference for the competitive viability, market positioning, and fatal traps facing **Competitive Racing Arena Party (CRAP)**.
+This document serves as the permanent strategic reference for the competitive viability, market positioning, and fatal traps facing **Over The Brim**.
 
 ---
 
@@ -43,9 +43,8 @@ Most indie racers fail on Twitch because streams are locked to a single driver's
 - **The Danger**: Virtual on-screen joysticks on smartphones feel terrible for high-speed precision arcade racing.
 - **Rule**: Phones are strictly for Spectator Chaos Controls (tapping hazard triggers, voting, betting). Racing requires physical gamepads or keyboards.
 
-### Trap 4: Storefront & Platform Suppressive Acronym (CRAP)
-- **The Danger**: Valve, Nintendo, Sony, Microsoft, and family-friendly Twitch streamers frequently suppress or filter profanity acronyms in search algorithms and promotional features.
-- **Rule**: Keep *Competitive Racing Arena Party* as the internal/community identity, but maintain storefront-safe branding options.
+### Trap 4: Storefront & Platform Suppressive Acronym (Resolved)
+- **Resolution**: Shifted from the provisional working title "CRAP" to **Over The Brim** — playing on the hat brim and the edge of disaster. Completely eliminates storefront censorship and search algorithm suppression while delivering a distinct, 100% collision-free brand.
 
 ---
 

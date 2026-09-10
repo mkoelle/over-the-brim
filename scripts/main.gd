@@ -5,4 +5,4 @@ extends Node
 
 
 func _ready() -> void:
-	print_rich("[color=green][CRAP][/color] Main scene initialized successfully.")
+	print_rich("[color=green][OverTheBrim][/color] Main scene initialized successfully.")

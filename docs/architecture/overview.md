@@ -1,6 +1,6 @@
 # System Architecture Overview
 
-This document defines the high-level system architecture, core managers, data flow, and scaling strategy for **Competitive Racing Arena Party (CRAP)**.
+This document defines the high-level system architecture, core managers, data flow, and scaling strategy for **Over The Brim**.
 
 ---
 

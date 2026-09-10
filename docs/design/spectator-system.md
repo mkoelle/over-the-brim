@@ -1,6 +1,6 @@
 # Spectator System Design
 
-In **Competitive Racing Arena Party (CRAP)**, being eliminated or sitting on the bench does **not** mean putting the controller down. Spectating is an active, competitive role that directly influences race outcomes.
+In **Over The Brim**, being eliminated or sitting on the bench does **not** mean putting the controller down. Spectating is an active, competitive role that directly influences race outcomes.
 
 ---
 

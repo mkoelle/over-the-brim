@@ -1,6 +1,6 @@
 # Game Pillars & Design Guardrails
 
-This document defines the core pillars and non-negotiable design guardrails for **Competitive Racing Arena Party (CRAP)**.
+This document defines the core pillars and non-negotiable design guardrails for **Over The Brim**.
 
 ---
 

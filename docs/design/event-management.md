@@ -1,6 +1,6 @@
 # Event Management & Session Direction
 
-This document details the session hosting, match configuration, role delegation, and multi-monitor display architecture for **Competitive Racing Arena Party (CRAP)**.
+This document details the session hosting, match configuration, role delegation, and multi-monitor display architecture for **Over The Brim**.
 
 ---
 
@@ -8,7 +8,7 @@ This document details the session hosting, match configuration, role delegation,
 
 In couch and LAN party games, the host often becomes an unpaid tournament administrator: trapped in configuration menus, re-seeding brackets, and adjusting settings while everyone else plays.
 
-**CRAP solves this with the Role-Based Event Director pattern**:
+**Over The Brim solves this with the Role-Based Event Director pattern**:
 - The machine running the server is decoupled from the person running the event.
 - Event management can live on the host, be delegated to a spectator/presenter client, or run across multiple local screens simultaneously.
 
