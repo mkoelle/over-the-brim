@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/arenas/test_track.tscn" id="2_track"]
 [ext_resource type="PackedScene" path="res://scenes/vehicles/tophat_car.tscn" id="3_car"]
 [ext_resource type="Script" path="res://scripts/camera/chase_camera.gd" id="4_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/debug_overlay.tscn" id="5_debug"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -16,3 +17,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -20)
 [node name="ChaseCamera" type="Camera3D" parent="."]
 current = true
 script = ExtResource("4_camera")
+
+[node name="DebugOverlay" parent="." instance=ExtResource("5_debug")]

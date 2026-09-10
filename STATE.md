@@ -128,19 +128,21 @@ before it unless marked parallel.
    tests --ignoreHeadlessMode -c` passes.
    *Depends on*: 3, 4.
 
-9. **Debug HUD toggle** (P2, optional, not yet done) — on-screen
-   speed/gear readout gated behind a `GameConfig.debug_mode` flag, off by
-   default. Keeps debug tools separated from the player experience per
-   the maturity checklist; skip if #1-8 already feel done without it —
-   they do, so treat this as a nice-to-have, not a blocker.
-   *Depends on*: 4, 7.
+9. **Debug HUD toggle** (P2, optional) — **done.** `GameConfig.debug_mode`
+   (off by default, toggled at runtime with F3) gates
+   `scenes/ui/debug_overlay.tscn` (`scripts/ui/debug_overlay.gd`), a
+   top-left readout of speed, live throttle/steer/drift input, and FPS.
+   Reads `VehicleController.last_input` rather than polling `Input.*`
+   itself, keeping Architecture Decision 01 intact. See
+   `docs/standards/manual-testing.md`.
 
-**Tasks 1-8 are complete** (`feature/drivable-prototype`, not yet merged).
-Next actions once this branch lands: open the project in the editor and
-actually feel-test the handling by hand (headless verification confirms
-correctness, not fun — see Guardrail 1 in game-pillars.md), then decide
-whether task 9 or real hat-car art comes first before starting Iteration
-02.
+**Tasks 1-9 are all complete** (`feature/drivable-prototype`, not yet
+merged). Next action: open the project in the editor and actually
+feel-test the handling by hand (headless verification confirms
+correctness, not fun — see Guardrail 1 in game-pillars.md) — press F3 for
+live telemetry while doing it — then decide on real hat-car art vs. the
+Iteration 02 drift-boost candidate below before starting the next
+milestone.
 
 ### Iteration 02 candidate: drift boost ("mini-turbo")
 

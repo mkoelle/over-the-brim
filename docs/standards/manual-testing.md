@@ -68,8 +68,9 @@ aren't "bugs," they're calibration.
 
 ## Debug mode
 
-Does not exist yet. STATE.md's Iteration 01 task list (item 9, optional/
-P2) specs a `GameConfig.debug_mode` flag gating an on-screen speed/gear
-HUD, off by default — not yet implemented. Until then, the editor's
-Remote Inspector (while the game is running) or a temporary `print()` in
-`vehicle_controller.gd` are the only ways to see live values.
+Press **F3** during play to toggle `GameConfig.debug_mode` (off by
+default — never on for players). While on, `DebugOverlay`
+(`scenes/ui/debug_overlay.tscn`) shows a top-left readout of speed vs.
+max speed, live throttle/steer/drift input, and FPS — pulled from
+`VehicleController.last_input` and `velocity`, so it reflects exactly
+what the car is reacting to.

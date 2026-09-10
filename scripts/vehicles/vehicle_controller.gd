@@ -23,9 +23,14 @@ var input_source: InputSource = InputSource.new()
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
+## This frame's raw input snapshot, kept for external readout only (e.g.
+## DebugOverlay) — not read back by this script itself.
+var last_input: Dictionary[String, Variant] = {}
+
 
 func _physics_process(delta: float) -> void:
 	var input: Dictionary[String, Variant] = input_source.get_input()
+	last_input = input
 	var throttle: float = float(input.get("throttle", 0.0))
 	var steer: float = float(input.get("steer", 0.0))
 	var drift: bool = bool(input.get("drift", false))
