@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://5tg78r237ark"]
 
+[ext_resource type="Texture2D" path="res://assets/art/tracks/dev_grid.png" id="1_grid_tex"]
+
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
 background_color = Color(0.6, 0.75, 0.9, 1)
@@ -9,6 +11,23 @@ size = Vector3(100, 1, 100)
 
 [sub_resource type="BoxMesh" id="Mesh_Ground"]
 size = Vector3(100, 1, 100)
+
+[sub_resource type="StandardMaterial3D" id="Material_Ground"]
+albedo_texture = ExtResource("1_grid_tex")
+uv1_scale = Vector3(20, 20, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_Boundary"]
+albedo_color = Color(0.85, 0.35, 0.05, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Material_Obstacle"]
+albedo_color = Color(0.9, 0.78, 0.15, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Material_Ramp"]
+albedo_color = Color(0.2, 0.5, 0.85, 1)
+roughness = 0.6
 
 [sub_resource type="BoxShape3D" id="Shape_BoundaryNS"]
 size = Vector3(100, 3, 1)
@@ -70,6 +89,7 @@ shape = SubResource("Shape_Ground")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=1901294086]
 mesh = SubResource("Mesh_Ground")
+material_override = SubResource("Material_Ground")
 
 [node name="Walls" type="Node3D" parent="." unique_id=2078436293]
 
@@ -82,6 +102,7 @@ shape = SubResource("Shape_BoundaryNS")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/BoundaryNorth" unique_id=1211670323]
 mesh = SubResource("Mesh_BoundaryNS")
+material_override = SubResource("Material_Boundary")
 
 [node name="BoundarySouth" type="StaticBody3D" parent="Walls" unique_id=791408802]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -49.5)
@@ -92,6 +113,7 @@ shape = SubResource("Shape_BoundaryNS")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/BoundarySouth" unique_id=1211670324]
 mesh = SubResource("Mesh_BoundaryNS")
+material_override = SubResource("Material_Boundary")
 
 [node name="BoundaryEast" type="StaticBody3D" parent="Walls" unique_id=1427338631]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 1.5, 0)
@@ -102,6 +124,7 @@ shape = SubResource("Shape_BoundaryEW")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/BoundaryEast" unique_id=1535921312]
 mesh = SubResource("Mesh_BoundaryEW")
+material_override = SubResource("Material_Boundary")
 
 [node name="BoundaryWest" type="StaticBody3D" parent="Walls" unique_id=1427338632]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 1.5, 0)
@@ -112,6 +135,7 @@ shape = SubResource("Shape_BoundaryEW")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/BoundaryWest" unique_id=1535921313]
 mesh = SubResource("Mesh_BoundaryEW")
+material_override = SubResource("Material_Boundary")
 
 [node name="InnerWallA" type="StaticBody3D" parent="Walls" unique_id=369465893]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -23)
@@ -122,6 +146,7 @@ shape = SubResource("Shape_InnerWallA")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/InnerWallA" unique_id=1955197161]
 mesh = SubResource("Mesh_InnerWallA")
+material_override = SubResource("Material_Obstacle")
 
 [node name="InnerWallB" type="StaticBody3D" parent="Walls" unique_id=260021587]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.5, -6)
@@ -132,6 +157,7 @@ shape = SubResource("Shape_InnerWallB")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/InnerWallB" unique_id=87168086]
 mesh = SubResource("Mesh_InnerWallB")
+material_override = SubResource("Material_Obstacle")
 
 [node name="EndCapSouth" type="StaticBody3D" parent="Walls" unique_id=1206827460]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -40)
@@ -142,6 +168,7 @@ shape = SubResource("Shape_EndCapSouth")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/EndCapSouth" unique_id=1663218917]
 mesh = SubResource("Mesh_EndCapSouth")
+material_override = SubResource("Material_Obstacle")
 
 [node name="EndCapEast" type="StaticBody3D" parent="Walls" unique_id=1877708904]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 1.5, 0)
@@ -152,6 +179,7 @@ shape = SubResource("Shape_EndCapEast")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/EndCapEast" unique_id=1491341246]
 mesh = SubResource("Mesh_EndCapEast")
+material_override = SubResource("Material_Obstacle")
 
 [node name="Ramp" type="StaticBody3D" parent="." unique_id=1442593319]
 transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.258819, 0, -0.258819, 0.9659258, -25, 1.5670648, 25)
@@ -162,3 +190,4 @@ shape = SubResource("Shape_Ramp")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ramp" unique_id=1389171184]
 mesh = SubResource("Mesh_Ramp")
+material_override = SubResource("Material_Ramp")

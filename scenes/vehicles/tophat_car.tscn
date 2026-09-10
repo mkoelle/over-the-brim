@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/vehicles/vehicle_controller.gd" id="1_script"]
 [ext_resource type="Resource" path="res://resources/vehicles/stovepipe_speedster.tres" id="2_stats"]
@@ -8,6 +8,11 @@ size = Vector3(1, 1, 2)
 
 [sub_resource type="BoxMesh" id="Mesh_Body"]
 size = Vector3(1, 1, 2)
+
+[sub_resource type="StandardMaterial3D" id="Material_Body"]
+albedo_color = Color(0.75, 0.1, 0.15, 1)
+roughness = 0.4
+metallic = 0.1
 
 [node name="TophatCar" type="CharacterBody3D"]
 collision_layer = 2
@@ -20,3 +25,4 @@ shape = SubResource("Shape_Body")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("Mesh_Body")
+material_override = SubResource("Material_Body")
