@@ -5,14 +5,18 @@ on:
     tags:
       - "v*.*.*"
 
+env:
+  # Pin in lockstep with ci.yml's GODOT_VERSION and project.godot's engine version.
+  GODOT_VERSION: "4.7.2"
+
 jobs:
   export:
     name: Export ${{ matrix.name }}
     runs-on: ubuntu-latest
     container:
-      # Pin in lockstep with ci.yml's GODOT_VERSION and project.godot's engine version.
       image: barichello/godot-ci:4.7.2
     strategy:
+      fail-fast: false
       matrix:
         include:
           - name: windows
@@ -38,6 +42,23 @@ jobs:
 
       - name: Import project
         run: godot --headless --editor --quit
+
+      - name: Ensure Godot export templates
+        run: |
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable"
+          if [ -d "$TEMPLATE_DIR" ] && [ -n "$(ls -A "$TEMPLATE_DIR" 2>/dev/null)" ]; then
+            echo "Export templates already present at $TEMPLATE_DIR"
+            exit 0
+          fi
+          echo "Export templates missing at $TEMPLATE_DIR — downloading official ${{ env.GODOT_VERSION }} templates."
+          command -v curl >/dev/null || (apt-get update && apt-get install -y curl)
+          command -v unzip >/dev/null || (apt-get update && apt-get install -y unzip)
+          curl -fL -o /tmp/templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_export_templates.tpz"
+          mkdir -p "$TEMPLATE_DIR"
+          unzip -q /tmp/templates.tpz -d /tmp/templates_extract
+          mv /tmp/templates_extract/templates/* "$TEMPLATE_DIR/"
+          rm -rf /tmp/templates.tpz /tmp/templates_extract
 
       - name: Configure Android signing
         if: matrix.name == 'android'

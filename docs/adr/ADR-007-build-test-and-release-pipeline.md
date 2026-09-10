@@ -40,10 +40,24 @@ custom render pipeline; no live-ops backend).
   GDScript parse/script errors, and GdUnit4 test execution (skipped with a
   notice until the addon is installed).
 - **Release (`release.yml`):** triggered by pushing a `v*.*.*` tag. Uses the
-  `barichello/godot-ci` Docker image (bundles matching export templates +
-  Android SDK) to export Windows, Linux, macOS, and Android in parallel
-  matrix jobs, zips each, and publishes them to a GitHub Release via
-  `softprops/action-gh-release`.
+  `barichello/godot-ci` Docker image (bundles export templates + Android SDK)
+  to export Windows, Linux, macOS, and Android in parallel matrix jobs, zips
+  each, and publishes them to a GitHub Release via `softprops/action-gh-release`.
+  `fail-fast: false` on the matrix — the first real tag push (`v0.0.1-alpha`)
+  had Linux fail and cascade-cancel the other three platforms before they even
+  ran, which lost the diagnostic signal from all of them at once.
+  An "Ensure Godot export templates" step now runs before every export: if
+  `~/.local/share/godot/export_templates/<version>.stable/` isn't already
+  populated (checked, not assumed), it downloads the official
+  `Godot_v<version>-stable_export_templates.tpz` from the godotengine/godot
+  GitHub release and unpacks it. This removes the dependency on
+  `barichello/godot-ci`'s bundled templates matching the pinned engine patch
+  exactly — the same failure mode reproduced locally against a bare Godot
+  4.7.2 install (`ERROR: Cannot export project with preset "Linux" ... No
+  export template found`) even though the preset config itself was verified
+  correct. The archive is ~1.2GB; the step is a no-op (just an `ls` check)
+  whenever the image's own templates are already usable, so this only costs
+  download time on the fallback path.
 - **Targets: Desktop (Win/Linux/macOS) + Android**, no iOS/Web yet — nothing
   in the design docs needs those; add when a concrete need exists (e.g. the
   spectator companion app from ADR-006 might justify Web/mobile later).
