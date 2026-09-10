@@ -135,7 +135,7 @@ We decouple network server ownership (`peer_id == 1`) from event management (see
 - **Event Director**: Holds the `director_token` and controls track selection, feature toggles/mutators, and bracket advancement. Can be retained by the host or delegated to a secondary PC, tablet, or presenter client.
 - **Resilient Fallback**: If the delegated director disconnects, authority immediately snaps back to the Host server without interrupting gameplay.
 
-### Single-PC "Host/Presenter Twofer" (Multi-Window)
+### Single-PC "Host/Presenter" (Multi-Window)
 On desktop platforms with multiple monitors, the host can leverage Godot 4's `DisplayServer.window_create()` or sub-`Window` nodes to output two distinct views from a single engine process:
 - **Display 1 (Player Monitor)**: 1–4 player split-screen racing viewport for local drivers.
 - **Display 2 (Living Room TV / Projector / Stream)**: Clean Presenter broadcast feed or private Event Operator dashboard.
