@@ -7,6 +7,9 @@
 *.keystore
 *.jks
 
+# GdUnit4 generated test reports
+/reports/
+
 # OS
 .DS_Store
 Thumbs.db

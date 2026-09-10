@@ -23,10 +23,18 @@ custom render pipeline; no live-ops backend).
 - **Test framework: GdUnit4.** Chosen over GUT for its scene-runner frame
   simulation (`simulate_frames`), which fits testing physics/frame-based
   vehicle behavior better than GUT's manual frame stepping, and its official
-  GitHub Action, which reduces custom CI glue. The addon itself is not
-  vendored by this ADR — install it via the AssetLib/editor into
-  `addons/gdUnit4/` when the first tests are written; `.github/workflows/ci.yml`
-  already checks for that directory and runs tests if present.
+  GitHub Action, which reduces custom CI glue. Vendored at `addons/gdUnit4/`
+  (v6.2.0), registered in `project.godot`'s `[editor_plugins] enabled`.
+  Verified locally (Godot 4.7.2): `godot --headless -s
+  addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c` runs
+  and exits with the correct non-zero code on a failing test, and exits 0
+  cleanly when suites pass. One quirk found during verification: with **zero**
+  test suites present, the runner never quits on its own (it polls
+  indefinitely) — `--quit-after 1` looked like a fix but corrupts real test
+  runs (crashes the engine with SIGSEGV mid-suite, since it tears down the
+  process after exactly one frame regardless of whether async test execution
+  has finished). The real fix is a shell-level `timeout` in `ci.yml`, which
+  only matters until `tests/` holds a real suite.
 - **CI (`ci.yml`):** on push/PR to `main` — headless import
   (`--headless --editor --quit`), a headless run-and-quit pass to surface
   GDScript parse/script errors, and GdUnit4 test execution (skipped with a

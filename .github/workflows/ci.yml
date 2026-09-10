@@ -36,7 +36,11 @@ jobs:
       - name: Run GdUnit4 tests
         run: |
           if [ -d "addons/gdUnit4" ]; then
-            godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add tests -rd -c
+            # timeout guards the one case GdUnit4 doesn't quit on its own:
+            # zero test suites found. With real tests present it exits on
+            # its own well within this bound (verified locally: a single
+            # failing test completes and exits in ~10ms).
+            timeout 120 godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
           else
             echo "addons/gdUnit4 not installed yet — skipping test run (see docs/adr/ADR-007)."
           fi

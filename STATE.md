@@ -29,8 +29,11 @@
 - Established design guardrails and strategic risk analysis.
 - Added build/test/release foundation (ADR-007): placeholder app icon,
   `export_presets.cfg` for Windows/Linux/macOS/Android, GitHub Actions CI
-  (`ci.yml`) and tag-triggered release pipeline (`release.yml`), GdUnit4
-  chosen as test framework (not yet vendored).
+  (`ci.yml`) and tag-triggered release pipeline (`release.yml`).
+- Vendored GdUnit4 (v6.2.0) into `addons/gdUnit4/`, enabled in
+  `project.godot`, verified locally against Godot 4.7.2 (correct pass/fail
+  exit codes; `ci.yml` updated with the working CLI invocation + a timeout
+  guard for the zero-test-suite edge case).
 
 ---
 
@@ -38,7 +41,7 @@
 1. Create `VehicleStats` Resource script (`res://scripts/resources/vehicle_stats.gd`).
 2. Create prototype top-hat vehicle scene (`res://scenes/vehicles/tophat_car.tscn`) and controller (`res://scripts/vehicles/vehicle_controller.gd`).
 3. Build sandbox test track with collision geometry (`res://scenes/arenas/test_track.tscn`).
-4. Install GdUnit4 into `addons/gdUnit4/` (AssetLib) once #1-3 give something worth testing.
+4. Write the first real GdUnit4 test suite once #1-3 give something worth testing.
 5. Before first real release: provision an Android release keystore and set
    `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEY_ALIAS` / `ANDROID_KEYSTORE_PASSWORD`
    GitHub Secrets (see ADR-007) — until then, release builds are debug-signed.

@@ -300,7 +300,7 @@ godot --path . --scene res://scenes/main.tscn
 Run tests (GdUnit4, ADR-007, once `addons/gdUnit4/` is installed):
 
 ```bash
-godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add tests -rd -c
+godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
 ```
 
 Export a build locally:
