@@ -54,9 +54,14 @@ func _physics_process(delta: float) -> void:
 	velocity.z = flat_velocity.z
 
 	# --- Steering: yaw rate scales with steer input and how fast we're
-	# going (arcade-style — no spinning in place at a standstill). ---
+	# going (arcade-style — no spinning in place at a standstill). Scaled by
+	# signf(current_speed) so steer_right always curves the actual path
+	# right on screen, forward or reverse — real cars invert this in
+	# reverse (turn the wheel right, the nose swings right but the car
+	# actually travels left), which reads as broken controls in a casual
+	# party game. "Fun > Realism" (docs/design/game-pillars.md) wins here. ---
 	var speed_factor: float = clampf(absf(current_speed) / stats.max_speed, 0.0, 1.0)
-	var yaw: float = -steer * stats.steering_rate * speed_factor * delta
+	var yaw: float = -steer * stats.steering_rate * speed_factor * delta * signf(current_speed)
 	rotate_y(yaw)
 
 	# --- Gravity ---
