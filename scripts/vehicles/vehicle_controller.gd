@@ -39,40 +39,47 @@ func _physics_process(delta: float) -> void:
 	var flat_velocity: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
 	var current_speed: float = flat_velocity.dot(forward)
 
-	# --- Acceleration / braking along the vehicle's forward basis ---
-	if throttle >= 0.0:
-		current_speed += throttle * stats.acceleration * delta
-	else:
-		current_speed += throttle * stats.braking_force * delta
-	current_speed = clampf(current_speed, -stats.max_speed, stats.max_speed)
+	# --- Ground control (accel/brake/drift/steer) only applies with
+	# traction. Airborne, none of this runs: horizontal velocity is left
+	# untouched so the car falls as a clean ballistic arc off a ramp edge
+	# instead of having its velocity re-snapped to "forward * current_speed"
+	# every frame (which produced a floaty "slow drift" feel instead of an
+	# actual fall — no traction, no business dictating horizontal motion).
+	# Deliberately no air-steer/air-control for now; add it later as a
+	# trick mechanic if wanted, not as a side effect of skipping this gate. ---
+	if is_on_floor():
+		# --- Acceleration / braking along the vehicle's forward basis ---
+		if throttle >= 0.0:
+			current_speed += throttle * stats.acceleration * delta
+		else:
+			current_speed += throttle * stats.braking_force * delta
+		current_speed = clampf(current_speed, -stats.max_speed, stats.max_speed)
 
-	var target_flat_velocity: Vector3 = forward * current_speed
+		var target_flat_velocity: Vector3 = forward * current_speed
 
-	# --- Drift: let velocity retain more of its previous direction than
-	# the new forward-aligned target, instead of snapping fully onto it. ---
-	if drift:
-		flat_velocity = flat_velocity.lerp(target_flat_velocity, stats.drift_grip)
-	else:
-		flat_velocity = target_flat_velocity
+		# --- Drift: let velocity retain more of its previous direction than
+		# the new forward-aligned target, instead of snapping fully onto it. ---
+		if drift:
+			flat_velocity = flat_velocity.lerp(target_flat_velocity, stats.drift_grip)
+		else:
+			flat_velocity = target_flat_velocity
 
-	velocity.x = flat_velocity.x
-	velocity.z = flat_velocity.z
+		velocity.x = flat_velocity.x
+		velocity.z = flat_velocity.z
 
-	# --- Steering: yaw rate scales with steer input and how fast we're
-	# going (arcade-style — no spinning in place at a standstill). Scaled by
-	# signf(current_speed) so steer_right always curves the actual path
-	# right on screen, forward or reverse — real cars invert this in
-	# reverse (turn the wheel right, the nose swings right but the car
-	# actually travels left), which reads as broken controls in a casual
-	# party game. "Fun > Realism" (docs/design/game-pillars.md) wins here. ---
-	var speed_factor: float = clampf(absf(current_speed) / stats.max_speed, 0.0, 1.0)
-	var yaw: float = -steer * stats.steering_rate * speed_factor * delta * signf(current_speed)
-	rotate_y(yaw)
+		# --- Steering: yaw rate scales with steer input and how fast we're
+		# going (arcade-style — no spinning in place at a standstill). Scaled
+		# by signf(current_speed) so steer_right always curves the actual
+		# path right on screen, forward or reverse — real cars invert this in
+		# reverse (turn the wheel right, the nose swings right but the car
+		# actually travels left), which reads as broken controls in a casual
+		# party game. "Fun > Realism" (docs/design/game-pillars.md) wins here. ---
+		var speed_factor: float = clampf(absf(current_speed) / stats.max_speed, 0.0, 1.0)
+		var yaw: float = -steer * stats.steering_rate * speed_factor * delta * signf(current_speed)
+		rotate_y(yaw)
 
-	# --- Gravity ---
-	if not is_on_floor():
-		velocity.y -= _gravity * delta
-	else:
 		velocity.y = 0.0
+	else:
+		velocity.y -= _gravity * delta
 
 	move_and_slide()

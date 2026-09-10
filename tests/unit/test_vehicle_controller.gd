@@ -31,6 +31,22 @@ const TOPHAT_CAR_SCENE := "res://scenes/vehicles/tophat_car.tscn"
 const THROTTLE_FRAMES := 180
 
 
+## Ground control (accel/brake/drift/steer) only runs while is_on_floor()
+## is true — a deliberate fix so the car falls ballistically off a ramp
+## instead of having its velocity re-snapped to the current facing every
+## frame while airborne. Tests that exercise ground behavior need an
+## actual floor under the standalone car instance, or is_on_floor() is
+## always false and throttle correctly does nothing.
+func _add_floor_under(car: Node3D) -> void:
+	var floor_body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	(shape.shape as BoxShape3D).size = Vector3(200, 1, 200)
+	floor_body.add_child(shape)
+	floor_body.position = car.global_position + Vector3(0, -1.0, 0)
+	car.get_parent().add_child(floor_body)
+
+
 func test_loads_without_error() -> void:
 	var runner := scene_runner(TOPHAT_CAR_SCENE)
 	var car: VehicleController = runner.scene()
@@ -43,6 +59,7 @@ func test_loads_without_error() -> void:
 func test_accelerates_under_throttle_and_respects_max_speed() -> void:
 	var runner := scene_runner(TOPHAT_CAR_SCENE)
 	var car: VehicleController = runner.scene()
+	_add_floor_under(car)
 	var start_position: Vector3 = car.global_position
 
 	runner.simulate_action_press("throttle")
@@ -52,10 +69,9 @@ func test_accelerates_under_throttle_and_respects_max_speed() -> void:
 	var flat_velocity: Vector3 = Vector3(car.velocity.x, 0.0, car.velocity.z)
 	var forward_speed: float = flat_velocity.dot(forward)
 
-	# Moved forward from the start position (horizontal plane only — the
-	# car has no floor under it in this standalone instantiation, so it
-	# also falls under gravity; that vertical motion isn't what this
-	# assertion is about).
+	# Moved forward from the start position (horizontal plane only —
+	# ground control (and therefore this whole test) requires
+	# is_on_floor(), so a floor is added under the car above).
 	var flat_displacement: Vector3 = Vector3(
 		car.global_position.x - start_position.x,
 		0.0,
