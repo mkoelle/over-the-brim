@@ -51,3 +51,22 @@ At the end of every race, spectators are celebrated alongside drivers on the vic
 | **Best Spectator (MVP)** | Highest overall spectator score combining minigame accuracy and trap impact. |
 
 Spectator points also count toward overall team rankings in tournament brackets!
+
+---
+
+## Presenter Mode & Broadcast Integration
+
+For spectators watching on a dedicated television, projector, or livestream, **Presenter Mode** operates as a broadcast-grade automated television director (see [ADR-005](file:///docs/adr/ADR-005-presenter-and-active-spectator-architecture.md)):
+
+### Smart Director Camera Heuristics
+- **Lead Tracking**: Automatically follows the current race leader.
+- **Bumper Battle Cam**: Cuts to close pack racing when 2–3 cars are within $\le 0.5$s delta.
+- **Shortcut & Ramp Cam**: Frames vehicles launching off ramp trucks or diving into secret alleyways.
+- **Elimination Danger Cam**: In Battle Royale mode, targets the car in last place during the final countdown seconds.
+- **Auto Crash Cam**: Triggers an automatic 3-second cinematic replay when severe collisions occur.
+
+### Broadcast Stage & Trap Feeds
+- **Hazard Activation Banners**: Prominently displays which spectator triggered an event (*"Player 3 triggered TRAIN CROSSING!"*).
+- **Picture-in-Picture (PiP) Trap Cam**: Shows a mini-window of the hazard deploying as the lead pack approaches.
+- **Clean Feed Toggle**: Hides all debug/editor interfaces, showing only TV-style position tickers, lap times, and player avatars.
+
