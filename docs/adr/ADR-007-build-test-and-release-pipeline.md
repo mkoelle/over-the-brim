@@ -185,6 +185,23 @@ custom render pipeline; no live-ops backend).
   may still be needed. Full notarization requires an Apple Developer Program
   membership and is out of scope for this stage; revisit if/when the project
   ships beyond internal alpha testing.
+- **Windows exe icon.** The compiled `.exe` kept showing Godot's default
+  robot icon regardless of `application/icon`, because
+  `application/modify_resources` — the flag that gates whether Godot edits
+  the built exe's PE resources (icon, version info) at all — was `false`.
+  The icon path being empty was a secondary, moot problem underneath that.
+  Generated `assets/art/ui/icon.ico` (multi-size: 16/24/32/48/64/128/256,
+  rendered from `icon.svg` via Godot's own `Image.load_svg_from_string` at
+  each target scale, assembled with Pillow — no SVG rasterizer was
+  available locally and this reuses the exact renderer Godot already uses
+  for the editor icon, keeping every platform's icon visually identical).
+  Set `application/modify_resources=true` and
+  `application/icon="res://assets/art/ui/icon.ico"`. Verified locally by
+  parsing the exported `.exe`'s PE resource table with `pefile`: 6 RT_ICON
+  entries present, PNG-encoded, matching the custom icon — not Godot's
+  default. macOS (`application/icon`, needs `.icns`) and Android
+  (`launcher_icons/*`, needs per-density PNGs) have the same empty-icon-field
+  gap and weren't fixed here — this was scoped to the Windows question asked.
 
 ### Consequences
 
