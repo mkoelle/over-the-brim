@@ -27,22 +27,27 @@ extends Camera3D
 
 ## Desired distance behind the target, in meters, measured along the
 ## target's current -Z (forward) axis — so the offset trails wherever the
-## car is pointed, not a fixed world-space direction.
-@export var follow_distance: float = 6.0
+## car is pointed, not a fixed world-space direction. Kart-racer chase cams
+## sit close (~2-2.5x vehicle length) rather than the more cinematic
+## distance open-world driving games use; tophat_car.tscn's body is 2m
+## long, so 4.5m keeps it tight.
+@export var follow_distance: float = 4.5
 
-## Desired height above the target, in meters.
-@export var follow_height: float = 2.5
+## Desired height above the target, in meters. Lower/closer than a
+## cinematic follow cam, per the same kart-racer convention.
+@export var follow_height: float = 1.8
 
 ## Position smoothing rate, in 1/seconds — higher follows the desired spot
 ## more tightly, lower trails looser. Framerate-independent: applied as an
 ## exponential-decay lerp weight (1 - exp(-rate * delta)) rather than a
 ## fixed per-frame fraction, so behavior doesn't change with physics tick
-## rate.
-@export var follow_smoothing: float = 6.0
+## rate. Kart racers favor a snappier, low-lag chase cam over a loose
+## cinematic one.
+@export var follow_smoothing: float = 8.0
 
 ## Look-at smoothing rate, in 1/seconds, same shape as follow_smoothing but
 ## applied to the camera's rotation toward the target instead of position.
-@export var look_smoothing: float = 8.0
+@export var look_smoothing: float = 10.0
 
 ## No collision/clipping-avoidance against level geometry yet — deferred
 ## to a future polish pass; a simple trailing offset is enough for this

@@ -38,11 +38,17 @@ const KEYBOARD_DEVICE: int = -1
 const JOY_AXIS_THROTTLE := JOY_AXIS_TRIGGER_RIGHT
 const JOY_AXIS_BRAKE := JOY_AXIS_TRIGGER_LEFT
 const JOY_AXIS_STEER := JOY_AXIS_LEFT_X
-const JOY_BUTTON_DRIFT := JOY_BUTTON_A
+## Right shoulder/bumper, not a face button — kart-racer convention
+## (Mario Kart 8/World) keeps drift on a shoulder button so it can be held
+## alongside throttle/brake (both triggers) and steering (stick) without
+## fighting for a thumb.
+const JOY_BUTTON_DRIFT := JOY_BUTTON_RIGHT_SHOULDER
 
 ## Analog sticks/triggers can rest slightly off zero on real hardware;
-## ignore magnitudes below this as noise.
-const AXIS_DEADZONE: float = 0.15
+## ignore magnitudes below this as noise. A healthy modern stick only
+## needs ~0.05-0.10 — 0.15 was overly conservative (source: controller
+## deadzone research, see STATE.md/task notes).
+const AXIS_DEADZONE: float = 0.08
 
 ## The device this source reads from: KEYBOARD_DEVICE (-1) for keyboard,
 ## or a joypad device id (0, 1, 2, ...) as reported by Input.get_connected_joypads().

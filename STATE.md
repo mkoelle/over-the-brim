@@ -142,6 +142,20 @@ correctness, not fun — see Guardrail 1 in game-pillars.md), then decide
 whether task 9 or real hat-car art comes first before starting Iteration
 02.
 
+### Iteration 02 candidate: drift boost ("mini-turbo")
+
+Control-conventions audit against the kart-racer genre (Mario Kart 8/World,
+genre pattern generally) found one real gap: `drift_grip` on
+`VehicleStats` only reduces lateral traction while drifting — there's no
+charge/release boost. Every genre reference agrees the boost payoff, not
+the slide itself, is the actual point of drifting and the game's one core
+technical skill element. Not a bug relative to this milestone's Definition
+of Done (which only asked for basic accel/brake/steer/drift feel), but the
+next feel-priority once #1-8 are hand-tested and confirmed fun. Likely
+shape: charge a timer while `drift` is held above some minimum speed,
+tiered boost strength by charge duration (see Mini-Turbo's
+regular/super/ultra tiers), applied as a temporary speed boost on release.
+
 ### Explicitly out of scope for this milestone
 
 Per the *Over-Engineering Before Fun* risk below and Guardrail 3: no
