@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="VehicleStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/vehicle_stats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+max_speed = 24.0
+acceleration = 14.0
+braking_force = 22.0
+steering_rate = 2.4
+drift_grip = 0.55
+mass = 900.0
