@@ -7,3 +7,4 @@
 - **[ADR-005](file:///docs/adr/ADR-005-presenter-and-active-spectator-architecture.md)**: Presenter Mode and Active Spectator Architecture
 - **[ADR-006](file:///docs/adr/ADR-006-role-based-event-direction-and-multi-window.md)**: Role-Based Event Direction and Multi-Window Host Architecture
 - **[ADR-007](file:///docs/adr/ADR-007-build-test-and-release-pipeline.md)**: Build, Test, and Release Pipeline (GdUnit4, GitHub Actions CI/release, Desktop+Android)
+- **[ADR-008](file:///docs/adr/ADR-008-llm-delegation-model-selection.md)**: LLM Delegation Model Selection (OpenRouter)

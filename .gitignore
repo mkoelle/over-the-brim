@@ -13,6 +13,9 @@
 # Crash dumps from local export/CI reproduction
 *.core
 
+# MCP config (contains API keys)
+.mcp.json
+
 # OS
 .DS_Store
 Thumbs.db

@@ -267,6 +267,35 @@ progress, not individual tasks.
 
 ---
 
+# Agent Delegation
+
+OpenRouter MCP server (`.mcp.json`, gitignored) is available for delegating
+work to cheaper/faster models instead of doing it directly.
+
+Delegate when:
+
+- work is mechanical or high-volume: renames, boilerplate GDScript, bulk doc
+  generation, repetitive refactors
+- task carries low architectural risk
+
+Keep in Claude Code (do not delegate) when:
+
+- work touches architecture, ADR-governed systems, or gameplay feel
+- correctness on Godot/GDScript specifics matters and hasn't been verified
+  for the chosen delegate model
+- work involves anything under Boundaries below
+
+Model choices, per-model Godot-specific evidence, and rationale: see
+[ADR-008](docs/adr/ADR-008-llm-delegation-model-selection.md). Do not pick a
+delegate model ad hoc — use the primary/secondary lists there, and treat
+models with no Godot-specific evidence (secondary list) as higher-review
+output.
+
+$5 spend cap is set on the OpenRouter API key. If a delegated task appears to
+be failing or looping, stop and escalate rather than retrying blindly.
+
+---
+
 # Boundaries
 
 Never modify:
