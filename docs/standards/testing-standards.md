@@ -11,7 +11,7 @@ Require:
 
 GdUnit4 (ADR-007). Install via AssetLib/editor into `addons/gdUnit4/`.
 Run via `task test` (see `Taskfile.yml`), or raw:
-`godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c`.
+`godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a test --ignoreHeadlessMode -c`.
 CI (`.github/workflows/ci.yml`) runs the same `task test` automatically once
 the addon is present.
 

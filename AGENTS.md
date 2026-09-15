@@ -355,7 +355,7 @@ task clean            # sweep build/, reports/, godot_check.log
 Raw equivalent for `task test` if Task isn't installed:
 
 ```bash
-godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
+godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a test --ignoreHeadlessMode -c
 ```
 
 Cut a release (tag push triggers `.github/workflows/release.yml`):

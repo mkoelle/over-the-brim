@@ -8,7 +8,7 @@ See AGENTS.md for naming conventions and coding rules.
 
 Formatting and lint rules are enforced by [gdtoolkit](https://github.com/Scony/godot-gdscript-toolkit)
 (`gdformat` + `gdlint`), default config (100-char lines, Godot's official
-class-member ordering). Scoped to `scripts/` and `tests/` — `addons/` is
+class-member ordering). Scoped to `scripts/` and `test/` — `addons/` is
 vendored, not reformatted.
 
 ```bash

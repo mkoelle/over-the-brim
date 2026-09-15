@@ -2,10 +2,10 @@ extends GdUnitTestSuite
 
 ## Real behavioral coverage for VehicleController (STATE.md's Next Recommended
 ## Tasks item 8), replacing reliance on the boot-only smoke test in
-## tests/integration/test_main.gd.
+## test/integration/test_main.gd.
 ##
 ## Input is driven through the scene_runner's simulate_action_press()/
-## simulate_action_release(), the same pattern tests/integration/test_main.gd
+## simulate_action_release(), the same pattern test/integration/test_main.gd
 ## uses for scene_runner()/simulate_frames(). Under the hood
 ## GdUnitSceneRunnerImpl calls Input.action_press("throttle", 1.0) /
 ## Input.action_release("throttle") on the shared global action map

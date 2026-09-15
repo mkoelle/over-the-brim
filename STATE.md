@@ -120,12 +120,12 @@ before it unless marked parallel.
    drivable, camera follows. This is the milestone's actual finish line.
    *Depends on*: 3, 4, 5, 6.
 
-8. **Real GdUnit4 test** (`tests/unit/test_vehicle_controller.gd`) —
+8. **Real GdUnit4 test** (`test/unit/test_vehicle_controller.gd`) —
    replace reliance on the boot-only smoke test: load `vehicle_stats.tres`,
    drive the controller via `scene_runner().simulate_frames()` with a
    fixed throttle input, assert it moved and didn't NaN out.
    *Verify*: `godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a
-   tests --ignoreHeadlessMode -c` passes.
+   test --ignoreHeadlessMode -c` passes.
    *Depends on*: 3, 4.
 
 9. **Debug HUD toggle** (P2, optional) — **done.** `GameConfig.debug_mode`

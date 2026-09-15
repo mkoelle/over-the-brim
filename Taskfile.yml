@@ -9,7 +9,7 @@ vars:
   GDTOOLKIT_VERSION: 4.*
   # First-party GDScript only — addons/ (gdUnit4) is vendored, not ours to
   # reformat or lint.
-  GD_PATHS: scripts/ tests/
+  GD_PATHS: scripts/ test/
 
 tasks:
   default:
@@ -77,7 +77,7 @@ tasks:
         elif command -v gtimeout >/dev/null 2>&1; then
           TIMEOUT_BIN="gtimeout 120"
         fi
-        $TIMEOUT_BIN godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
+        $TIMEOUT_BIN godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a test --ignoreHeadlessMode -c
 
   fmt:
     desc: Reformat first-party GDScript in place (gdformat).
