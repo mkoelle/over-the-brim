@@ -193,3 +193,11 @@ track is confirmed fun.
   ([ADR-011](file:///docs/adr/ADR-011-ai-state-machine-addon-limboai.md)).
   See [ADR-012](file:///docs/adr/ADR-012-self-implementation-boundary.md)
   for what must never move to an addon.
+- **Test coverage reporting** — evaluated `gdUnit4-coverage`
+  (godot-gdunit-labs), the only real GDScript coverage tool for Godot 4.
+  As of 2026-09-14 it's v0.1.4 open beta: closed-source GDExtension + a
+  patched "gdcov" engine binary, capped at 20 distinct tracked files per
+  session (free trial, no license key yet). Not adopted — revisit once it
+  exits beta or the file cap lifts; until then, `task test` /
+  `docs/standards/testing-standards.md` coverage is judged by hand, not
+  measured.

@@ -18,5 +18,7 @@ extends Node
 func _ready() -> void:
 	_chase_camera.target = _car
 	_debug_overlay.target = _car
-	print_rich("[color=green][OverTheBrim][/color] Test track loaded, car spawned, chase camera following.")
+	print_rich(
+		"[color=green][OverTheBrim][/color] Test track loaded, car spawned, chase camera following."
+	)
 	EventBus.race_started.emit()

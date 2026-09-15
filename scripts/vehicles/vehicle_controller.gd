@@ -23,11 +23,11 @@ extends CharacterBody3D
 ## node is drivable standalone with no external wiring.
 var input_source: InputSource = InputSource.new()
 
-var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
-
 ## This frame's raw input snapshot, kept for external readout only (e.g.
 ## DebugOverlay) — not read back by this script itself.
 var last_input: Dictionary[String, Variant] = {}
+
+var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
 
 func _physics_process(delta: float) -> void:
@@ -85,7 +85,9 @@ func _physics_process(delta: float) -> void:
 	# actually travels left), which reads as broken controls in a casual
 	# party game. "Fun > Realism" (docs/design/game-pillars.md) wins here. ---
 	var speed_factor: float = clampf(absf(current_speed) / stats.max_speed, 0.0, 1.0)
-	var yaw: float = -steer * stats.steering_rate * speed_factor * delta * signf(current_speed) * control_factor
+	var yaw: float = (
+		-steer * stats.steering_rate * speed_factor * delta * signf(current_speed) * control_factor
+	)
 	rotate_y(yaw)
 
 	# --- Gravity ---

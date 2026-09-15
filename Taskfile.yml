@@ -1,0 +1,85 @@
+# Local-parity runner for what CI does. Every job in .github/workflows/ci.yml
+# calls one of these tasks so there is exactly one place the steps are
+# defined — run `task ci` locally before pushing instead of guessing whether
+# it'll pass.
+version: "3"
+
+vars:
+  GODOT_VERSION: 4.7.2
+  GDTOOLKIT_VERSION: 4.*
+  # First-party GDScript only — addons/ (gdUnit4) is vendored, not ours to
+  # reformat or lint.
+  GD_PATHS: scripts/ tests/
+
+tasks:
+  default:
+    desc: Run the full local CI pipeline (same steps as GitHub Actions).
+    cmds:
+      - task: ci
+
+  deps:
+    desc: Install gdformat/gdlint (gdtoolkit) for local formatting and linting.
+    cmds:
+      - pip3 install --user "gdtoolkit=={{.GDTOOLKIT_VERSION}}"
+
+  import:
+    desc: Headless editor pass to import all project assets.
+    cmds:
+      - godot --headless --editor --quit
+
+  check:
+    desc: Run the project headless once and fail on parse/script errors.
+    cmds:
+      - |
+        godot --headless --quit 2>&1 | tee godot_check.log
+        if grep -qiE "SCRIPT ERROR|Parse Error" godot_check.log; then
+          echo "GDScript parse errors found."
+          exit 1
+        fi
+
+  test:
+    desc: Run the GdUnit4 test suite.
+    cmds:
+      - |
+        if [ ! -d "addons/gdUnit4" ]; then
+          echo "addons/gdUnit4 not installed yet — skipping test run (see docs/adr/ADR-007)."
+          exit 0
+        fi
+        # The timeout guards the one case GdUnit4 doesn't quit on its own:
+        # zero test suites found. With real tests present it exits on its
+        # own well within this bound (verified locally: a single failing
+        # test completes and exits in ~10ms). `timeout` is GNU coreutils
+        # (present on CI's ubuntu runner); macOS doesn't ship it by default,
+        # so fall back to `gtimeout` (brew coreutils) and, failing that,
+        # run untimed rather than erroring.
+        TIMEOUT_BIN=""
+        if command -v timeout >/dev/null 2>&1; then
+          TIMEOUT_BIN="timeout 120"
+        elif command -v gtimeout >/dev/null 2>&1; then
+          TIMEOUT_BIN="gtimeout 120"
+        fi
+        $TIMEOUT_BIN godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
+
+  fmt:
+    desc: Reformat first-party GDScript in place (gdformat).
+    cmds:
+      - gdformat {{.GD_PATHS}}
+
+  fmt:check:
+    desc: Check GDScript formatting without modifying files (CI mode).
+    cmds:
+      - gdformat --check --diff {{.GD_PATHS}}
+
+  lint:
+    desc: Lint first-party GDScript (gdlint).
+    cmds:
+      - gdlint {{.GD_PATHS}}
+
+  ci:
+    desc: Everything the GitHub Actions CI job runs, in the same order.
+    cmds:
+      - task: import
+      - task: check
+      - task: test
+      - task: fmt:check
+      - task: lint

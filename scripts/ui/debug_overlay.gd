@@ -26,11 +26,14 @@ func _process(_delta: float) -> void:
 	var steer: float = float(target.last_input.get("steer", 0.0))
 	var drift: bool = bool(target.last_input.get("drift", false))
 
-	_label.text = "Speed: %.1f / %.1f m/s\nThrottle: %+.2f\nSteer: %+.2f\nDrift: %s\nFPS: %d" % [
-		speed,
-		target.stats.max_speed,
-		throttle,
-		steer,
-		"YES" if drift else "no",
-		Engine.get_frames_per_second(),
-	]
+	_label.text = (
+		"Speed: %.1f / %.1f m/s\nThrottle: %+.2f\nSteer: %+.2f\nDrift: %s\nFPS: %d"
+		% [
+			speed,
+			target.stats.max_speed,
+			throttle,
+			steer,
+			"YES" if drift else "no",
+			Engine.get_frames_per_second(),
+		]
+	)

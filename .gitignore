@@ -13,6 +13,9 @@
 # Crash dumps from local export/CI reproduction
 *.core
 
+# Local `task check` scratch output
+godot_check.log
+
 # MCP config (contains API keys)
 .mcp.json
 

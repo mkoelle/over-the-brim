@@ -10,8 +10,13 @@ Require:
 ## Test Framework
 
 GdUnit4 (ADR-007). Install via AssetLib/editor into `addons/gdUnit4/`.
-Run headless: `godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c`.
-CI (`.github/workflows/ci.yml`) runs this automatically once the addon is present.
+Run via `task test` (see `Taskfile.yml`), or raw:
+`godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c`.
+CI (`.github/workflows/ci.yml`) runs the same `task test` automatically once
+the addon is present.
+
+No code coverage measurement yet — see STATE.md's deferred tooling section
+for why (`gdUnit4-coverage` is beta/capped/closed-source as of 2026-09-14).
 
 ## Test Categories
 

@@ -73,9 +73,7 @@ func test_accelerates_under_throttle_and_respects_max_speed() -> void:
 	# ground control (and therefore this whole test) requires
 	# is_on_floor(), so a floor is added under the car above).
 	var flat_displacement: Vector3 = Vector3(
-		car.global_position.x - start_position.x,
-		0.0,
-		car.global_position.z - start_position.z
+		car.global_position.x - start_position.x, 0.0, car.global_position.z - start_position.z
 	)
 	assert_float(flat_displacement.length()).is_greater(0.0)
 

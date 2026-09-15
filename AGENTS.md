@@ -326,7 +326,17 @@ Run game:
 godot --path . --scene res://scenes/main.tscn
 ```
 
-Run tests (GdUnit4, ADR-007, once `addons/gdUnit4/` is installed):
+Run the same checks CI runs (import, parse check, tests, format check,
+lint — see `Taskfile.yml`; requires [Task](https://taskfile.dev)):
+
+```bash
+task ci          # everything, in CI order
+task test        # just GdUnit4 (ADR-007), once addons/gdUnit4/ is installed
+task fmt         # reformat GDScript in place (gdformat)
+task lint        # gdlint
+```
+
+Raw equivalent if Task isn't installed:
 
 ```bash
 godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c

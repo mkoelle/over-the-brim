@@ -22,25 +22,27 @@ jobs:
           version: ${{ env.GODOT_VERSION }}
           use-dotnet: false
 
+      - name: Setup Task
+        uses: arduino/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install gdformat/gdlint
+        run: task deps
+
+      # Every step below is also `task <name>` locally (see Taskfile.yml) —
+      # `task ci` runs the same sequence in one shot for a pre-push check.
       - name: Import project (headless editor pass)
-        run: godot --headless --editor --quit
+        run: task import
 
       - name: Check for parse/script errors
-        run: |
-          godot --headless --quit 2>&1 | tee godot_check.log
-          if grep -qiE "SCRIPT ERROR|Parse Error" godot_check.log; then
-            echo "GDScript parse errors found."
-            exit 1
-          fi
+        run: task check
 
       - name: Run GdUnit4 tests
-        run: |
-          if [ -d "addons/gdUnit4" ]; then
-            # timeout guards the one case GdUnit4 doesn't quit on its own:
-            # zero test suites found. With real tests present it exits on
-            # its own well within this bound (verified locally: a single
-            # failing test completes and exits in ~10ms).
-            timeout 120 godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
-          else
-            echo "addons/gdUnit4 not installed yet — skipping test run (see docs/adr/ADR-007)."
-          fi
+        run: task test
+
+      - name: Check GDScript formatting
+        run: task fmt:check
+
+      - name: Lint GDScript
+        run: task lint

@@ -73,7 +73,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	global_position = global_position.lerp(desired_position, _decay_weight(follow_smoothing, delta))
-	global_transform.basis = global_transform.basis.slerp(desired_basis, _decay_weight(look_smoothing, delta))
+	global_transform.basis = global_transform.basis.slerp(
+		desired_basis, _decay_weight(look_smoothing, delta)
+	)
 
 
 func _compute_desired_position() -> Vector3:
