@@ -1,7 +1,7 @@
 # Development State
 
 ## Active Milestone
-**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-8 complete on `feature/drivable-prototype`, pending review/merge.**
+**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-9 complete, PR open from `feature/drivable-prototype`. Blocking gate before merge: hand feel-test (see "Next action" below) — headless CI passing is necessary, not sufficient, per Guardrail 1.**
 
 ---
 
@@ -136,8 +136,8 @@ before it unless marked parallel.
    itself, keeping Architecture Decision 01 intact. See
    `docs/standards/manual-testing.md`.
 
-**Tasks 1-9 are all complete** (`feature/drivable-prototype`, not yet
-merged). Next action: open the project in the editor and actually
+**Tasks 1-9 are all complete** (`feature/drivable-prototype`, PR open,
+not yet merged). Next action: open the project in the editor and actually
 feel-test the handling by hand (headless verification confirms
 correctness, not fun — see Guardrail 1 in game-pillars.md) — press F3 for
 live telemetry while doing it — then decide on real hat-car art vs. the
