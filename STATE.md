@@ -184,3 +184,12 @@ track is confirmed fun.
 - Replace placeholder `icon.svg`/derived `.ico`/`.icns`/Android icons with
   real art once `assets/art/ui/` has one; update `config/icon` and every
   `export_presets.cfg` icon field to match.
+- Vendor **netfox** when Tier 2 networked-grid work starts
+  ([ADR-009](file:///docs/adr/ADR-009-netcode-addon-netfox.md)),
+  **Controller Icons** when the first real input-prompt UI is built
+  ([ADR-010](file:///docs/adr/ADR-010-input-glyph-addon-controller-icons.md)),
+  and **LimboAI** when `RaceManager`/`TournamentManager` state machines or
+  AI bots land
+  ([ADR-011](file:///docs/adr/ADR-011-ai-state-machine-addon-limboai.md)).
+  See [ADR-012](file:///docs/adr/ADR-012-self-implementation-boundary.md)
+  for what must never move to an addon.
