@@ -18,7 +18,17 @@ tasks:
       - task --list-all
 
   setup:
-    desc: Install gdformat/gdlint (gdtoolkit) for local formatting and linting.
+    desc: >-
+      Full local dev setup: gdformat/gdlint + the pre-commit hook (runs
+      task fmt + task lint on every commit).
+    cmds:
+      - pip3 install --user "gdtoolkit=={{.GDTOOLKIT_VERSION}}" pre-commit
+      - pre-commit install
+
+  setup:ci:
+    desc: >-
+      Minimal setup for CI — gdformat/gdlint only. No git hook; CI never
+      commits.
     cmds:
       - pip3 install --user "gdtoolkit=={{.GDTOOLKIT_VERSION}}"
 
@@ -92,6 +102,35 @@ tasks:
       - task: test
       - task: fmt:check
       - task: lint
+
+  verify:
+    desc: >-
+      Same checks as `ci`, but runs all of them even if one fails and
+      prints a pass/fail summary at the end — full feedback in one pass
+      instead of fix-one-rerun-repeat. `ci` stays fail-fast to match what
+      GitHub Actions actually does.
+    silent: true
+    cmds:
+      - |
+        set +e
+        FAILED=0
+        RESULTS_FILE=$(mktemp)
+        for name in import check:parse test fmt:check lint; do
+          echo "=== $name ==="
+          task "$name"
+          rc=$?
+          if [ "$rc" -eq 0 ]; then
+            echo "PASS  $name" >> "$RESULTS_FILE"
+          else
+            echo "FAIL  $name" >> "$RESULTS_FILE"
+            FAILED=1
+          fi
+          echo
+        done
+        echo "--- verify summary ---"
+        cat "$RESULTS_FILE"
+        rm -f "$RESULTS_FILE"
+        exit $FAILED
 
   export:windows:
     desc: >-

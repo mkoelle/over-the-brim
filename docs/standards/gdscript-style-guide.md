@@ -18,6 +18,9 @@ task lint        # gdlint
 ```
 
 CI (`.github/workflows/ci.yml`) fails on either check. Run `task setup` once
-to install `gdformat`/`gdlint` locally (needs Python/pip).
+to install `gdformat`/`gdlint` locally and register a pre-commit hook that
+runs `task fmt` + `task lint` on every commit — catches issues before
+they're even committed, not just before CI runs. (CI itself uses the
+leaner `task setup:ci`, which skips the hook — it never commits.)
 
 Details to be expanded as patterns emerge during development.

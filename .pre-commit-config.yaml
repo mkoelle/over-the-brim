@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: gdformat
+        name: gdformat (reformat first-party GDScript)
+        entry: task fmt
+        language: system
+        files: \.gd$
+        pass_filenames: false
+      - id: gdlint
+        name: gdlint (first-party GDScript)
+        entry: task lint
+        language: system
+        files: \.gd$
+        pass_filenames: false

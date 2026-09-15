@@ -13,6 +13,10 @@ concurrency:
 env:
   GODOT_VERSION: "4.7.2"
 
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   qc:
     name: QC
@@ -40,7 +44,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install gdformat/gdlint
-        run: task setup
+        run: task setup:ci
 
       # Every step below is also `task <name>` locally (see Taskfile.yml) —
       # `task ci` runs the same sequence in one shot for a pre-push check.
@@ -58,3 +62,26 @@ jobs:
 
       - name: Lint GDScript
         run: task lint
+
+      # Purely a reporting layer — `task test` above is the real gate, so
+      # this never fails the job on its own (fail-on-error: false).
+      - name: Publish test report
+        if: always()
+        uses: dorny/test-reporter@v3
+        with:
+          name: GdUnit4 Tests
+          path: "reports/*/results.xml"
+          reporter: java-junit
+          fail-on-error: false
+          fail-on-empty: false
+
+      - name: Upload QC reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: qc-reports-${{ github.run_id }}
+          path: |
+            reports/
+            godot_check.log
+          retention-days: 7
+          if-no-files-found: ignore
