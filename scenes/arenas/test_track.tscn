@@ -105,7 +105,7 @@ size = Vector3(8, 1, 16)
 material = SubResource("Material_Ramp")
 
 [node name="Ramp2" type="CSGBox3D" parent="." unique_id=491477970]
-transform = Transform3D(1, 0, 0, 0, 0.86602557, 0.5000002, 0, -0.5000002, 0.86602557, -27.688313, -1.8326821, 8.730326)
+transform = Transform3D(1, 0, 0, 0, 0.86602557, 0.5000002, 0, -0.5000002, 0.86602557, -27.688313, 3.567, 8.730326)
 use_collision = true
 collision_mask = 0
 size = Vector3(8, 1, 16)
