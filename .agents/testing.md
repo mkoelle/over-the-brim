@@ -32,7 +32,7 @@ AssetLib/editor when the first test is written.
 
 # Test Organization
 
-- Place tests in tests/ mirroring the source structure
+- Place tests in test/ mirroring the source structure
 - Name test files: test_<system_name>.gd
 - Name test functions: test_<behavior_being_tested>()
 

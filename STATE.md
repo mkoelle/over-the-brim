@@ -1,7 +1,7 @@
 # Development State
 
 ## Active Milestone
-**Phase A: Foundation — Iteration 01: Drivable Prototype**
+**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-9 complete, PR open from `feature/drivable-prototype`. Blocking gate before merge: hand feel-test (see "Next action" below) — headless CI passing is necessary, not sufficient, per Guardrail 1.**
 
 ---
 
@@ -34,16 +34,170 @@
   `project.godot`, verified locally against Godot 4.7.2 (correct pass/fail
   exit codes; `ci.yml` updated with the working CLI invocation + a timeout
   guard for the zero-test-suite edge case).
+- Closed remaining release-infra gaps: `application/config/version` as the
+  version source of truth (`docs/standards/versioning.md`), macOS `.icns` +
+  Android adaptive launcher icons (placeholder art, generated from
+  `icon.svg`), `CHANGELOG.md`, and a documented branching/PR policy
+  (`docs/standards/branching.md`).
+- **Iteration 01 (Drivable Prototype) milestone reached** on
+  `feature/drivable-prototype`: input map + per-device `InputSource`
+  (Architecture Decision 01), data-driven `VehicleStats` resource
+  (`stovepipe_speedster.tres`), `VehicleController` (arcade accel/brake/
+  steer/drift on `CharacterBody3D`), `test_track.tscn` sandbox, a
+  `ChaseCamera`, and `main.tscn` wired end-to-end so running the project
+  spawns a drivable car on the test track with a following camera —
+  Guardrail 3's "1-Car Fun" Rule, verified. Real GdUnit4 coverage added
+  for `VehicleController` (acceleration, max-speed clamp, NaN guard).
 
 ---
 
+## Definition of Done — Iteration 01 (Drivable Prototype)
+
+Guardrail 3, the **"1-Car Fun" Rule**, in verifiable form: one hat-car,
+spawned on one test track, driven from a gamepad or keyboard, feels
+responsive — accelerate, brake, steer, drift — with no other system
+(menus, AI, networking, tournaments) in the loop. Ship nothing past this
+list until that's true and feels good.
+
 ## Next Recommended Tasks
-1. Create `VehicleStats` Resource script (`res://scripts/resources/vehicle_stats.gd`).
-2. Create prototype top-hat vehicle scene (`res://scenes/vehicles/tophat_car.tscn`) and controller (`res://scripts/vehicles/vehicle_controller.gd`).
-3. Build sandbox test track with collision geometry (`res://scenes/arenas/test_track.tscn`).
-4. Write the first real GdUnit4 test suite once #1-3 give something worth testing.
-5. Before first real release: provision an Android release keystore and set
-   `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEY_ALIAS` / `ANDROID_KEYSTORE_PASSWORD`
-   GitHub Secrets (see ADR-007) — until then, release builds are debug-signed.
-6. Replace placeholder `icon.svg` with real art once `assets/art/ui/` has one;
-   update `config/icon` and `export_presets.cfg`'s icon fields to match.
+
+Sized per `docs/standards/task-sizing.md` (1-4h, 1-3 files, one
+verification step each). Do them in order — each depends on the ones
+before it unless marked parallel.
+
+1. **Input Map** — define real input actions in `project.godot`
+   (`throttle`, `brake`, `steer_left`, `steer_right`, `drift`), each bound
+   to keyboard *and* gamepad. No code yet.
+   *Verify*: Project Settings → Input Map shows all five, each fires in
+   the Input Map's live test view.
+
+2. **Per-device input source** (`scripts/vehicles/input_source.gd`) —
+   small class wrapping a device index, polling the actions from #1 with
+   Godot's per-device input APIs, exposing a normalized
+   `{throttle, steer, drift}` read. This is Architecture Decision 01
+   (`docs/architecture/overview.md`) — vehicles must never poll `Input`
+   globally, so this has to exist before the controller does.
+   *Verify*: a temp script prints the struct while a controller is held;
+   values change only for that device's input.
+   *Depends on*: 1.
+
+3. **`VehicleStats` Resource** (`scripts/resources/vehicle_stats.gd` +
+   one instance, `resources/vehicles/stovepipe_speedster.tres`) — exported
+   `max_speed`, `acceleration`, `steering_rate`, `drift_grip`, `mass`.
+   Parallel with 1-2.
+   *Verify*: `.tres` opens in the Inspector with editable exported fields.
+
+4. **Vehicle controller + placeholder scene**
+   (`scripts/vehicles/vehicle_controller.gd`,
+   `scenes/vehicles/tophat_car.tscn`) — `CharacterBody3D`, primitive
+   capsule/box mesh (real hat art comes later), reads #2 + #3 to move:
+   accelerate/brake along facing, steer, basic drift slip.
+   *Verify*: instanced alone in an empty test scene with a flat floor,
+   WASD/gamepad moves and turns it.
+   *Depends on*: 2, 3.
+
+5. **Test track sandbox** (`scenes/arenas/test_track.tscn`) — flat ground
+   plane, a few corners, walls, one ramp; `StaticBody3D` collision only,
+   no art pass. Parallel with 1-4.
+   *Verify*: scene opens standalone, floor and walls have collision
+   (drop a `RigidBody3D` on it in-editor and confirm it rests on top).
+
+6. **Chase camera** (`scripts/camera/chase_camera.gd`) — single
+   `Camera3D` trailing the vehicle's transform. Not the full
+   `PresenterDirector`/`ViewportManager` from the architecture doc —
+   that's multi-viewport/broadcast machinery with no reason to exist
+   before one car is fun to drive.
+   *Verify*: attached to the car from #4 in a scratch scene, camera
+   follows smoothly through turns without clipping through geometry.
+   *Depends on*: 4.
+
+7. **Wire up `main.tscn`** — replace the placeholder title-label content
+   with: instance `test_track.tscn`, instance `tophat_car.tscn` at a spawn
+   point, attach the chase camera. `main.gd` emits one `EventBus` signal
+   (e.g. `race_started`) once everything is ready — no listeners need to
+   exist yet.
+   *Verify*: run the project (F5) — car spawns on the track, is
+   drivable, camera follows. This is the milestone's actual finish line.
+   *Depends on*: 3, 4, 5, 6.
+
+8. **Real GdUnit4 test** (`test/unit/test_vehicle_controller.gd`) —
+   replace reliance on the boot-only smoke test: load `vehicle_stats.tres`,
+   drive the controller via `scene_runner().simulate_frames()` with a
+   fixed throttle input, assert it moved and didn't NaN out.
+   *Verify*: `godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a
+   test --ignoreHeadlessMode -c` passes.
+   *Depends on*: 3, 4.
+
+9. **Debug HUD toggle** (P2, optional) — **done.** `GameConfig.debug_mode`
+   (off by default, toggled at runtime with F3) gates
+   `scenes/ui/debug_overlay.tscn` (`scripts/ui/debug_overlay.gd`), a
+   top-left readout of speed, live throttle/steer/drift input, and FPS.
+   Reads `VehicleController.last_input` rather than polling `Input.*`
+   itself, keeping Architecture Decision 01 intact. See
+   `docs/standards/manual-testing.md`.
+
+**Tasks 1-9 are all complete** (`feature/drivable-prototype`, PR open,
+not yet merged). Next action: open the project in the editor and actually
+feel-test the handling by hand (headless verification confirms
+correctness, not fun — see Guardrail 1 in game-pillars.md) — press F3 for
+live telemetry while doing it — then decide on real hat-car art vs. the
+Iteration 02 drift-boost candidate below before starting the next
+milestone.
+
+### Iteration 02 candidate: drift boost ("mini-turbo")
+
+Control-conventions audit against the kart-racer genre (Mario Kart 8/World,
+genre pattern generally) found one real gap: `drift_grip` on
+`VehicleStats` only reduces lateral traction while drifting — there's no
+charge/release boost. Every genre reference agrees the boost payoff, not
+the slide itself, is the actual point of drifting and the game's one core
+technical skill element. Not a bug relative to this milestone's Definition
+of Done (which only asked for basic accel/brake/steer/drift feel), but the
+next feel-priority once #1-8 are hand-tested and confirmed fun. Likely
+shape: charge a timer while `drift` is held above some minimum speed,
+tiered boost strength by charge duration (see Mini-Turbo's
+regular/super/ultra tiers), applied as a temporary speed boost on release.
+
+Same family, same research pass: jump tricks. Mario Kart Wii onward
+reward a timed trick input during a jump with a landing speed boost (a
+"Jump Boost" — same shape as Mini-Turbo, just keyed to airtime instead of
+a drift). `VehicleController` now has `stats.air_control` (partial
+control/boost effectiveness while airborne, added when the initial "falls
+like a slow drift" bug turned out to be an overcorrection — genre
+research showed kart racers universally give *some* air control, several
+(Crash Team Racing) more than ground control) but no trick/boost-on-land
+mechanic yet. Bundle with the drift-boost work above when it's tackled.
+
+### Explicitly out of scope for this milestone
+
+Per the *Over-Engineering Before Fun* risk below and Guardrail 3: no
+`TournamentManager`, `RaceManager` state machine, `PlayerManager`,
+networking/`MultiplayerSynchronizer`, splitscreen `SubViewport` grid,
+spectator/hazard systems, or menus. Add these only once one car on one
+track is confirmed fun.
+
+### Deferred, non-blocking (do before a *real* release, not before this milestone)
+
+- Provision an Android release keystore and set `ANDROID_KEYSTORE_BASE64` /
+  `ANDROID_KEY_ALIAS` / `ANDROID_KEYSTORE_PASSWORD` GitHub Secrets (see
+  ADR-007) — release builds stay debug-signed until then.
+- Replace placeholder `icon.svg`/derived `.ico`/`.icns`/Android icons with
+  real art once `assets/art/ui/` has one; update `config/icon` and every
+  `export_presets.cfg` icon field to match.
+- Vendor **netfox** when Tier 2 networked-grid work starts
+  ([ADR-009](file:///docs/adr/ADR-009-netcode-addon-netfox.md)),
+  **Controller Icons** when the first real input-prompt UI is built
+  ([ADR-010](file:///docs/adr/ADR-010-input-glyph-addon-controller-icons.md)),
+  and **LimboAI** when `RaceManager`/`TournamentManager` state machines or
+  AI bots land
+  ([ADR-011](file:///docs/adr/ADR-011-ai-state-machine-addon-limboai.md)).
+  See [ADR-012](file:///docs/adr/ADR-012-self-implementation-boundary.md)
+  for what must never move to an addon.
+- **Test coverage reporting** — evaluated `gdUnit4-coverage`
+  (godot-gdunit-labs), the only real GDScript coverage tool for Godot 4.
+  As of 2026-09-14 it's v0.1.4 open beta: closed-source GDExtension + a
+  patched "gdcov" engine binary, capped at 20 distinct tracked files per
+  session (free trial, no license key yet). Not adopted — revisit once it
+  exits beta or the file cap lifts; until then, `task test` /
+  `docs/standards/testing-standards.md` coverage is judged by hand, not
+  measured.

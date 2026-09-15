@@ -267,6 +267,35 @@ progress, not individual tasks.
 
 ---
 
+# Agent Delegation
+
+OpenRouter MCP server (`.mcp.json`, gitignored) is available for delegating
+work to cheaper/faster models instead of doing it directly.
+
+Delegate when:
+
+- work is mechanical or high-volume: renames, boilerplate GDScript, bulk doc
+  generation, repetitive refactors
+- task carries low architectural risk
+
+Keep in Claude Code (do not delegate) when:
+
+- work touches architecture, ADR-governed systems, or gameplay feel
+- correctness on Godot/GDScript specifics matters and hasn't been verified
+  for the chosen delegate model
+- work involves anything under Boundaries below
+
+Model choices, per-model Godot-specific evidence, and rationale: see
+[ADR-008](docs/adr/ADR-008-llm-delegation-model-selection.md). Do not pick a
+delegate model ad hoc — use the primary/secondary lists there, and treat
+models with no Godot-specific evidence (secondary list) as higher-review
+output.
+
+$5 spend cap is set on the OpenRouter API key. If a delegated task appears to
+be failing or looping, stop and escalate rather than retrying blindly.
+
+---
+
 # Boundaries
 
 Never modify:
@@ -289,27 +318,44 @@ config, not secrets.
 
 ---
 
+# Dependency & Tooling Versions
+
+When pinning a version — a GitHub Action (`uses: owner/repo@vX`), a pip/npm
+package, a vendored addon — verify the actual latest release first; don't
+pin from training-data memory. Model knowledge of "current" versions goes
+stale immediately and silently produces an outdated pin with no error.
+
+- Check via the registry's own source: `gh api repos/<owner>/<repo>/releases`
+  or `/tags` for GitHub Actions, `pip index versions <pkg>` / PyPI, the
+  Godot Asset Library page for addons.
+- Before bumping an existing pin, read that version's changelog/release
+  notes for breaking changes — don't bump blind.
+- If verification isn't possible (offline, private registry), say so
+  explicitly and flag the pin as unverified rather than presenting a guess
+  as current.
+
+---
+
 # Development Commands
 
-Run game:
+Everything below is a `task <name>` in `Taskfile.yml` (requires
+[Task](https://taskfile.dev); `task` with no args lists all of them):
 
 ```bash
-godot --path . --scene res://scenes/main.tscn
+task run              # launch the game
+task ci               # everything CI runs: import, check:parse, test, fmt:check, lint
+task test             # just GdUnit4 (ADR-007), once addons/gdUnit4/ is installed
+task fmt              # reformat GDScript in place (gdformat)
+task lint             # gdlint
+task export           # export all 4 platforms locally (needs export templates installed)
+task export:windows   # or one platform at a time — also :linux, :macos, :android
+task clean            # sweep build/, reports/, godot_check.log
 ```
 
-Run tests (GdUnit4, ADR-007, once `addons/gdUnit4/` is installed):
+Raw equivalent for `task test` if Task isn't installed:
 
 ```bash
-godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
-```
-
-Export a build locally:
-
-```bash
-godot --headless --export-release "Windows Desktop"
-godot --headless --export-release "Linux"
-godot --headless --export-release "macOS"
-godot --headless --export-debug "Android"
+godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a test --ignoreHeadlessMode -c
 ```
 
 Cut a release (tag push triggers `.github/workflows/release.yml`):

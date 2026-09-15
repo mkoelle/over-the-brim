@@ -2,17 +2,33 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
     branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GODOT_VERSION: "4.7.2"
 
+permissions:
+  contents: read
+  checks: write
+
 jobs:
-  test:
-    name: Import & Test
+  qc:
+    name: QC
     runs-on: ubuntu-latest
+    # Every branch gets the full QC pass on every push, so a solo dev sees
+    # a check on WIP commits without opening a PR first. But a bare push to
+    # a feature branch shouldn't page anyone — only a push to `main` (should
+    # never fail; that's post-merge) or a pull_request event (the actual
+    # merge gate) is allowed to turn this job red and trigger GitHub's
+    # failure notification. continue-on-error swallows the failure into a
+    # neutral/non-blocking result everywhere else.
+    continue-on-error: ${{ github.event_name == 'push' && github.ref != 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -22,25 +38,50 @@ jobs:
           version: ${{ env.GODOT_VERSION }}
           use-dotnet: false
 
+      - name: Setup Task
+        uses: arduino/setup-task@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install gdformat/gdlint
+        run: task setup:ci
+
+      # Every step below is also `task <name>` locally (see Taskfile.yml) —
+      # `task ci` runs the same sequence in one shot for a pre-push check.
       - name: Import project (headless editor pass)
-        run: godot --headless --editor --quit
+        run: task import
 
       - name: Check for parse/script errors
-        run: |
-          godot --headless --quit 2>&1 | tee godot_check.log
-          if grep -qiE "SCRIPT ERROR|Parse Error" godot_check.log; then
-            echo "GDScript parse errors found."
-            exit 1
-          fi
+        run: task check:parse
 
       - name: Run GdUnit4 tests
-        run: |
-          if [ -d "addons/gdUnit4" ]; then
-            # timeout guards the one case GdUnit4 doesn't quit on its own:
-            # zero test suites found. With real tests present it exits on
-            # its own well within this bound (verified locally: a single
-            # failing test completes and exits in ~10ms).
-            timeout 120 godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
-          else
-            echo "addons/gdUnit4 not installed yet — skipping test run (see docs/adr/ADR-007)."
-          fi
+        run: task test
+
+      - name: Check GDScript formatting
+        run: task fmt:check
+
+      - name: Lint GDScript
+        run: task lint
+
+      # Purely a reporting layer — `task test` above is the real gate, so
+      # this never fails the job on its own (fail-on-error: false).
+      - name: Publish test report
+        if: always()
+        uses: dorny/test-reporter@v3
+        with:
+          name: GdUnit4 Tests
+          path: "reports/*/results.xml"
+          reporter: java-junit
+          fail-on-error: false
+          fail-on-empty: false
+
+      - name: Upload QC reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: qc-reports-${{ github.run_id }}
+          path: |
+            reports/
+            godot_check.log
+          retention-days: 7
+          if-no-files-found: ignore

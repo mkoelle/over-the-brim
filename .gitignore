@@ -10,8 +10,17 @@
 # GdUnit4 generated test reports
 /reports/
 
+# GdUnit4 session-recovery cache (test guids/line numbers, regenerated per run)
+/addons/gdUnit4/GdUnitRunner.cfg
+
 # Crash dumps from local export/CI reproduction
 *.core
+
+# Local `task check` scratch output
+godot_check.log
+
+# MCP config (contains API keys)
+.mcp.json
 
 # OS
 .DS_Store

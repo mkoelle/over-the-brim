@@ -1,0 +1,172 @@
+# Local-parity runner for what CI does, plus the everyday dev loop. Every
+# job in .github/workflows/ci.yml calls one of these tasks so there is
+# exactly one place the steps are defined — run `task ci` locally before
+# pushing instead of guessing whether it'll pass.
+version: "3"
+
+vars:
+  GODOT_VERSION: 4.7.2
+  GDTOOLKIT_VERSION: 4.*
+  # First-party GDScript only — addons/ (gdUnit4) is vendored, not ours to
+  # reformat or lint.
+  GD_PATHS: scripts/ test/
+
+tasks:
+  default:
+    desc: List available tasks.
+    cmds:
+      - task --list-all
+
+  setup:
+    desc: >-
+      Full local dev setup: gdformat/gdlint + the pre-commit hook (runs
+      task fmt + task lint on every commit).
+    cmds:
+      - pip3 install --user "gdtoolkit=={{.GDTOOLKIT_VERSION}}" pre-commit
+      - pre-commit install
+
+  setup:ci:
+    desc: >-
+      Minimal setup for CI — gdformat/gdlint only. No git hook; CI never
+      commits.
+    cmds:
+      - pip3 install --user "gdtoolkit=={{.GDTOOLKIT_VERSION}}"
+
+  run:
+    desc: Launch the game.
+    cmds:
+      - godot --path . --scene res://scenes/main.tscn
+
+  import:
+    desc: Headless editor pass to import all project assets.
+    cmds:
+      - godot --headless --editor --quit
+
+  check:parse:
+    desc: Run the project headless once and fail on parse/script errors.
+    silent: true
+    cmds:
+      - |
+        godot --headless --quit 2>&1 | tee godot_check.log
+        if grep -qiE "SCRIPT ERROR|Parse Error" godot_check.log; then
+          echo "GDScript parse errors found."
+          exit 1
+        fi
+
+  test:
+    desc: Run the GdUnit4 test suite.
+    # Suppresses go-task's own command echo (the multi-line script itself)
+    # before it runs — GdUnit4's real test output below is unaffected.
+    silent: true
+    cmds:
+      - |
+        if [ ! -d "addons/gdUnit4" ]; then
+          echo "addons/gdUnit4 not installed yet — skipping test run (see docs/adr/ADR-007)."
+          exit 0
+        fi
+        # The timeout guards the one case GdUnit4 doesn't quit on its own:
+        # zero test suites found. With real tests present it exits on its
+        # own well within this bound (verified locally: a single failing
+        # test completes and exits in ~10ms). `timeout` is GNU coreutils
+        # (present on CI's ubuntu runner); macOS doesn't ship it by default,
+        # so fall back to `gtimeout` (brew coreutils) and, failing that,
+        # run untimed rather than erroring.
+        TIMEOUT_BIN=""
+        if command -v timeout >/dev/null 2>&1; then
+          TIMEOUT_BIN="timeout 120"
+        elif command -v gtimeout >/dev/null 2>&1; then
+          TIMEOUT_BIN="gtimeout 120"
+        fi
+        $TIMEOUT_BIN godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a test --ignoreHeadlessMode -c
+
+  fmt:
+    desc: Reformat first-party GDScript in place (gdformat).
+    cmds:
+      - gdformat {{.GD_PATHS}}
+
+  fmt:check:
+    desc: Check GDScript formatting without modifying files (CI mode).
+    cmds:
+      - gdformat --check --diff {{.GD_PATHS}}
+
+  lint:
+    desc: Lint first-party GDScript (gdlint).
+    cmds:
+      - gdlint {{.GD_PATHS}}
+
+  ci:
+    desc: Everything the GitHub Actions CI job runs, in the same order.
+    cmds:
+      - task: import
+      - task: check:parse
+      - task: test
+      - task: fmt:check
+      - task: lint
+
+  verify:
+    desc: >-
+      Same checks as `ci`, but runs all of them even if one fails and
+      prints a pass/fail summary at the end — full feedback in one pass
+      instead of fix-one-rerun-repeat. `ci` stays fail-fast to match what
+      GitHub Actions actually does.
+    silent: true
+    cmds:
+      - |
+        set +e
+        FAILED=0
+        RESULTS_FILE=$(mktemp)
+        for name in import check:parse test fmt:check lint; do
+          echo "=== $name ==="
+          task "$name"
+          rc=$?
+          if [ "$rc" -eq 0 ]; then
+            echo "PASS  $name" >> "$RESULTS_FILE"
+          else
+            echo "FAIL  $name" >> "$RESULTS_FILE"
+            FAILED=1
+          fi
+          echo
+        done
+        echo "--- verify summary ---"
+        cat "$RESULTS_FILE"
+        rm -f "$RESULTS_FILE"
+        exit $FAILED
+
+  export:windows:
+    desc: >-
+      Export a release Windows build to build/windows/. Requires export
+      templates installed locally (Editor > Manage Export Templates) —
+      release.yml instead runs inside a container that already has them.
+    cmds:
+      - godot --headless --export-release "Windows Desktop"
+
+  export:linux:
+    desc: "Export a release Linux build to build/linux/. Same export-template requirement as export:windows."
+    cmds:
+      - godot --headless --export-release "Linux"
+
+  export:macos:
+    desc: "Export a release macOS build to build/macos/. Same export-template requirement as export:windows."
+    cmds:
+      - godot --headless --export-release "macOS"
+
+  export:android:
+    desc: >-
+      Export a debug-signed Android build to build/android/ (release
+      keystore not provisioned yet — see STATE.md). Same export-template
+      requirement as export:windows.
+    cmds:
+      - godot --headless --export-debug "Android"
+
+  export:
+    desc: Export all four platforms (same set release.yml builds on tag push).
+    cmds:
+      - task: export:windows
+      - task: export:linux
+      - task: export:macos
+      - task: export:android
+
+  clean:
+    desc: Remove local build/test scratch output (all already gitignored).
+    cmds:
+      - rm -rf build/ reports/ godot_check.log

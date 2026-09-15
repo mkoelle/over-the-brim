@@ -16,8 +16,10 @@ This can't be set from the repository itself — it's a GitHub setting under
 **Settings → Branches → Branch protection rules** for `main`:
 
 - Require a pull request before merging.
-- Require status checks to pass before merging — select the `CI / Import &
-  Test` check from `ci.yml`.
+- Require status checks to pass before merging — select the `CI / QC`
+  check from `ci.yml`. (Renamed from `CI / Import & Test` — if branch
+  protection already references the old name, re-select it or the rule
+  silently stops enforcing anything.)
 - Require branches to be up to date before merging.
 - Optionally: require at least 1 approval once more than one person works
   on the repo (not needed solo, but the rule can be added without a
