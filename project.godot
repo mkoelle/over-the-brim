@@ -32,6 +32,10 @@ window/stretch/mode="canvas_items"
 
 enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
 
+[gdunit4]
+
+ui/toolbar/run_overall=true
+
 [input]
 
 throttle={
