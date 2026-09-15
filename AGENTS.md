@@ -318,37 +318,44 @@ config, not secrets.
 
 ---
 
+# Dependency & Tooling Versions
+
+When pinning a version — a GitHub Action (`uses: owner/repo@vX`), a pip/npm
+package, a vendored addon — verify the actual latest release first; don't
+pin from training-data memory. Model knowledge of "current" versions goes
+stale immediately and silently produces an outdated pin with no error.
+
+- Check via the registry's own source: `gh api repos/<owner>/<repo>/releases`
+  or `/tags` for GitHub Actions, `pip index versions <pkg>` / PyPI, the
+  Godot Asset Library page for addons.
+- Before bumping an existing pin, read that version's changelog/release
+  notes for breaking changes — don't bump blind.
+- If verification isn't possible (offline, private registry), say so
+  explicitly and flag the pin as unverified rather than presenting a guess
+  as current.
+
+---
+
 # Development Commands
 
-Run game:
+Everything below is a `task <name>` in `Taskfile.yml` (requires
+[Task](https://taskfile.dev); `task` with no args lists all of them):
 
 ```bash
-godot --path . --scene res://scenes/main.tscn
+task run              # launch the game
+task ci               # everything CI runs: import, check:parse, test, fmt:check, lint
+task test             # just GdUnit4 (ADR-007), once addons/gdUnit4/ is installed
+task fmt              # reformat GDScript in place (gdformat)
+task lint             # gdlint
+task export           # export all 4 platforms locally (needs export templates installed)
+task export:windows   # or one platform at a time — also :linux, :macos, :android
+task clean            # sweep build/, reports/, godot_check.log
 ```
 
-Run the same checks CI runs (import, parse check, tests, format check,
-lint — see `Taskfile.yml`; requires [Task](https://taskfile.dev)):
-
-```bash
-task ci          # everything, in CI order
-task test        # just GdUnit4 (ADR-007), once addons/gdUnit4/ is installed
-task fmt         # reformat GDScript in place (gdformat)
-task lint        # gdlint
-```
-
-Raw equivalent if Task isn't installed:
+Raw equivalent for `task test` if Task isn't installed:
 
 ```bash
 godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests --ignoreHeadlessMode -c
-```
-
-Export a build locally:
-
-```bash
-godot --headless --export-release "Windows Desktop"
-godot --headless --export-release "Linux"
-godot --headless --export-release "macOS"
-godot --headless --export-debug "Android"
 ```
 
 Cut a release (tag push triggers `.github/workflows/release.yml`):

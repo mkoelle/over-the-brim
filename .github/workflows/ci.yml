@@ -2,17 +2,29 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
     branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GODOT_VERSION: "4.7.2"
 
 jobs:
-  test:
-    name: Import & Test
+  qc:
+    name: QC
     runs-on: ubuntu-latest
+    # Every branch gets the full QC pass on every push, so a solo dev sees
+    # a check on WIP commits without opening a PR first. But a bare push to
+    # a feature branch shouldn't page anyone — only a push to `main` (should
+    # never fail; that's post-merge) or a pull_request event (the actual
+    # merge gate) is allowed to turn this job red and trigger GitHub's
+    # failure notification. continue-on-error swallows the failure into a
+    # neutral/non-blocking result everywhere else.
+    continue-on-error: ${{ github.event_name == 'push' && github.ref != 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -23,12 +35,12 @@ jobs:
           use-dotnet: false
 
       - name: Setup Task
-        uses: arduino/setup-task@v2
+        uses: arduino/setup-task@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install gdformat/gdlint
-        run: task deps
+        run: task setup
 
       # Every step below is also `task <name>` locally (see Taskfile.yml) —
       # `task ci` runs the same sequence in one shot for a pre-push check.
@@ -36,7 +48,7 @@ jobs:
         run: task import
 
       - name: Check for parse/script errors
-        run: task check
+        run: task check:parse
 
       - name: Run GdUnit4 tests
         run: task test

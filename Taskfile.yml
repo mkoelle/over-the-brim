@@ -1,7 +1,7 @@
-# Local-parity runner for what CI does. Every job in .github/workflows/ci.yml
-# calls one of these tasks so there is exactly one place the steps are
-# defined — run `task ci` locally before pushing instead of guessing whether
-# it'll pass.
+# Local-parity runner for what CI does, plus the everyday dev loop. Every
+# job in .github/workflows/ci.yml calls one of these tasks so there is
+# exactly one place the steps are defined — run `task ci` locally before
+# pushing instead of guessing whether it'll pass.
 version: "3"
 
 vars:
@@ -13,22 +13,28 @@ vars:
 
 tasks:
   default:
-    desc: Run the full local CI pipeline (same steps as GitHub Actions).
+    desc: List available tasks.
     cmds:
-      - task: ci
+      - task --list-all
 
-  deps:
+  setup:
     desc: Install gdformat/gdlint (gdtoolkit) for local formatting and linting.
     cmds:
       - pip3 install --user "gdtoolkit=={{.GDTOOLKIT_VERSION}}"
+
+  run:
+    desc: Launch the game.
+    cmds:
+      - godot --path . --scene res://scenes/main.tscn
 
   import:
     desc: Headless editor pass to import all project assets.
     cmds:
       - godot --headless --editor --quit
 
-  check:
+  check:parse:
     desc: Run the project headless once and fail on parse/script errors.
+    silent: true
     cmds:
       - |
         godot --headless --quit 2>&1 | tee godot_check.log
@@ -39,6 +45,9 @@ tasks:
 
   test:
     desc: Run the GdUnit4 test suite.
+    # Suppresses go-task's own command echo (the multi-line script itself)
+    # before it runs — GdUnit4's real test output below is unaffected.
+    silent: true
     cmds:
       - |
         if [ ! -d "addons/gdUnit4" ]; then
@@ -79,7 +88,46 @@ tasks:
     desc: Everything the GitHub Actions CI job runs, in the same order.
     cmds:
       - task: import
-      - task: check
+      - task: check:parse
       - task: test
       - task: fmt:check
       - task: lint
+
+  export:windows:
+    desc: >-
+      Export a release Windows build to build/windows/. Requires export
+      templates installed locally (Editor > Manage Export Templates) —
+      release.yml instead runs inside a container that already has them.
+    cmds:
+      - godot --headless --export-release "Windows Desktop"
+
+  export:linux:
+    desc: "Export a release Linux build to build/linux/. Same export-template requirement as export:windows."
+    cmds:
+      - godot --headless --export-release "Linux"
+
+  export:macos:
+    desc: "Export a release macOS build to build/macos/. Same export-template requirement as export:windows."
+    cmds:
+      - godot --headless --export-release "macOS"
+
+  export:android:
+    desc: >-
+      Export a debug-signed Android build to build/android/ (release
+      keystore not provisioned yet — see STATE.md). Same export-template
+      requirement as export:windows.
+    cmds:
+      - godot --headless --export-debug "Android"
+
+  export:
+    desc: Export all four platforms (same set release.yml builds on tag push).
+    cmds:
+      - task: export:windows
+      - task: export:linux
+      - task: export:macos
+      - task: export:android
+
+  clean:
+    desc: Remove local build/test scratch output (all already gitignored).
+    cmds:
+      - rm -rf build/ reports/ godot_check.log

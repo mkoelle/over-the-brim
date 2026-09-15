@@ -17,7 +17,7 @@ task fmt:check   # check only, no writes (what CI runs)
 task lint        # gdlint
 ```
 
-CI (`.github/workflows/ci.yml`) fails on either check. Run `task deps` once
+CI (`.github/workflows/ci.yml`) fails on either check. Run `task setup` once
 to install `gdformat`/`gdlint` locally (needs Python/pip).
 
 Details to be expanded as patterns emerge during development.
